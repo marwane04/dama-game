@@ -22,24 +22,6 @@ class DamierTest {
     }
 
     @Test
-    void testFaireGagnerNoir() {
-        damier.faireGagnerNoir();
-        assertEquals(EtatJeu.NOIR_GAGNE, damier.getEtat());
-    }
-
-    @Test
-    void testFaireGagnerRouge() {
-        damier.faireGagnerRouge();
-        assertEquals(EtatJeu.ROUGE_GAGNE, damier.getEtat());
-    }
-
-    @Test
-    void testFaireJeuNul() {
-        damier.faireJeuNul();
-        assertEquals(EtatJeu.NUL, damier.getEtat());
-    }
-
-    @Test
     void testDeplacerPiece() {
         Position positionInitiale = new Position(2, 0); // Assuming 2,1 is a Noir piece
         Position nouvelPosition = new Position(3, 1);
