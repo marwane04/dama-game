@@ -1,18 +1,18 @@
 package com.dama.model;
 
 public class Piece {
-    private final Couleur couleur;
+    private final Color color;
     private Position position;
-    private boolean estDame;
+    private boolean isKing;
 
-    public Piece(Couleur couleur, Position position) {
-        this.couleur = couleur;
+    public Piece(Color color, Position position) {
+        this.color = color;
         this.position = position;
-        this.estDame = false;
+        this.isKing = false;
     }
 
-    public Couleur getCouleur() {
-        return couleur;
+    public Color getColor() {
+        return color;
     }
 
     public Position getPosition() {
@@ -28,12 +28,12 @@ public class Piece {
         this.position.setY(y);
     }
 
-    public boolean estDame() {
-        return estDame;
+    public boolean isKing() {
+        return isKing;
     }
 
-    public void damer() {
-        this.estDame = true;
+    public void setKing() {
+        this.isKing = true;
     }
 
 }

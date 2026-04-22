@@ -25,13 +25,13 @@ public class Position {
         this.y = y;
     }
 
-    public static boolean estPositionJouable(int x, int y) {
+    public static boolean isPlayable(int x, int y) {
         return (x + y) % 2 == 0 && x >= 0 && x <= 7 && y >= 0 && y <= 7;
 
     }
 
-    public boolean estPositionJouable() {
-        return estPositionJouable(this.x, this.y);
+    public boolean isPlayable() {
+        return isPlayable(this.x, this.y);
     }
 
     @Override
