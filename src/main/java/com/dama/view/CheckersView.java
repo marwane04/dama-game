@@ -1,6 +1,7 @@
 package com.dama.view;
 
 public interface CheckersView {
+
     // Refresh the entire board display
     void refreshBoard();
 
@@ -16,6 +17,6 @@ public interface CheckersView {
     // Show a dialog when game ends
     void showGameOverMessage(String winner);
 
-    // Make the window visible
+    // Launch and show the window
     void show();
 }
