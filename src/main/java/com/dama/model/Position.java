@@ -30,6 +30,10 @@ public class Position {
 
     }
 
+    public static boolean isPlayable(Position position) {
+        return isPlayable(position.getX(), position.getY());
+    }
+
     public boolean isPlayable() {
         return isPlayable(this.x, this.y);
     }

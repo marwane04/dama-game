@@ -44,34 +44,109 @@ public class Board {
         }
     }
 
-    public void movePiece(Position initialPosition, Position newPosition) {
-        if (getPossibleMouvements(initialPosition).contains(newPosition)) {
-            this.pieces[newPosition.getX()][newPosition.getY()] = this.pieces[initialPosition.getX()][initialPosition.getY()];
-            this.pieces[initialPosition.getX()][initialPosition.getY()] = null;
-        }
-
+    public Piece getPiece(int x, int y) {
+        return this.pieces[x][y];
     }
 
-    public List<Position> getPossibleMouvements(Position position) {
-        Piece piece = this.pieces[position.getX()][position.getY()];
+    public Piece getPiece(Position position) {
+        return getPiece(position.getX(), position.getY());
+    }
+
+    /**
+     * Returns true when the target square is playable and not occupied.
+     */
+    private boolean isLegalLandingSquare(Piece piece, Position position) {
+        return position.isPlayable() && getPiece(position) == null;
+    }
+
+    private List<Position> getCaptureMoves(Position position) {
+        Piece piece = getPiece(position);
+        if(piece == null) return new ArrayList<>();
+
+        List<Position> captures = new ArrayList<>();
+        Position[] candidates;
+
+        int direction = piece.getColor() == Color.BLACK ? 1 : -1;
+        if (!piece.isKing()) {
+            candidates = new Position[]{
+                    new Position(position.getX() + direction, position.getY() + 1),
+                    new Position(position.getX() + direction, position.getY() - 1)
+            };
+        } else {
+            candidates = new Position[]{
+                    new Position(position.getX() + direction, position.getY() + 1),
+                    new Position(position.getX() + direction, position.getY() - 1),
+                    new Position(position.getX() - direction, position.getY() + 1),
+                    new Position(position.getX() - direction, position.getY() - 1)
+            };
+        }
+
+        for (Position candidate : candidates) {
+            if (!candidate.isPlayable()) continue;
+
+            Piece jumped = getPiece(candidate);
+            if (jumped == null || jumped.getColor() == piece.getColor()) continue;
+
+            int jumpX = position.getX() + (candidate.getX() - position.getX()) * 2;
+            int jumpY = position.getY() + (candidate.getY() - position.getY()) * 2;
+            Position landing = new Position(jumpX, jumpY);
+            if (isLegalLandingSquare(piece, landing)) captures.add(landing);
+        }
+
+        return captures;
+    }
+
+    public boolean hasCaptureMove(Color color) {
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                Piece piece = pieces[x][y];
+                if (piece == null || piece.getColor() != color) continue;
+                if (!getCaptureMoves(new Position(x, y)).isEmpty()) return true;
+            }
+        }
+        return false;
+    }
+
+    public void movePiece(Position initialPosition, Position newPosition) {
+        if (getPossibleMovements(initialPosition).contains(newPosition)) {
+            pieces[newPosition.getX()][newPosition.getY()] = getPiece(initialPosition);
+            pieces[initialPosition.getX()][initialPosition.getY()] = null;
+        }
+    }
+
+    public List<Position> getPossibleMovements(Position position) {
+        Piece piece = getPiece(position);
 
         if (!position.isPlayable() || piece == null) return new ArrayList<>();
 
-        List<Position> mouvements = new ArrayList<>();
+        List<Position> captures = getCaptureMoves(position);
+        if (!captures.isEmpty()) return captures;
 
-        if (Position.isPlayable(position.getX() + 1, position.getY() + 1) &&
-                (this.pieces[position.getX() + 1][position.getY() + 1] == null ||
-                this.pieces[position.getX() + 1][position.getY() + 1].getColor() != piece.getColor())) {
-            mouvements.add(new Position(position.getX() + 1, position.getY() + 1));
+        if (hasCaptureMove(piece.getColor())) return new ArrayList<>();
+
+        List<Position> movements = new ArrayList<>();
+        Position[] candidates;
+
+        int direction = piece.getColor() == Color.BLACK ? 1 : -1;
+        if (!piece.isKing()) {
+            candidates = new Position[]{
+                    new Position(position.getX() + direction, position.getY() + 1),
+                    new Position(position.getX() + direction, position.getY() - 1)
+            };
+        } else {
+            candidates = new Position[]{
+                    new Position(position.getX() + direction, position.getY() + 1),
+                    new Position(position.getX() + direction, position.getY() - 1),
+                    new Position(position.getX() - direction, position.getY() + 1),
+                    new Position(position.getX() - direction, position.getY() - 1)
+            };
         }
 
-        if (Position.isPlayable(position.getX() + 1, position.getY() - 1) &&
-                (this.pieces[position.getX() + 1][position.getY() - 1] == null ||
-                this.pieces[position.getX() + 1][position.getY() - 1].getColor() != piece.getColor())) {
-            mouvements.add(new Position(position.getX() + 1, position.getY() - 1));
+        for (Position candidate : candidates) {
+            if (isLegalLandingSquare(piece, candidate)) movements.add(candidate);
         }
 
-        return mouvements;
+        return movements;
     }
 
 
