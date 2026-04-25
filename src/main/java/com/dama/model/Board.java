@@ -5,10 +5,13 @@ import java.util.List;
 
 public class Board {
     private final Piece[][] pieces = new Piece[8][8];
+    private Color currentPlayer;
     private GameState state;
 
     public Board() {
         this.state = GameState.IN_PROGRESS;
+        //always red starts 😊
+        this.currentPlayer = Color.RED;
         initBoard();
     }
 
@@ -50,6 +53,18 @@ public class Board {
 
     public Piece getPiece(Position position) {
         return getPiece(position.getX(), position.getY());
+    }
+
+    public Color getCurrentPlayer() {
+        return this.currentPlayer;
+    }
+
+    public void switchTurn() {
+        if(this.currentPlayer == Color.BLACK) {
+            this.currentPlayer = Color.RED;
+        } else {
+            this.currentPlayer = Color.BLACK;
+        }
     }
 
     /**
@@ -111,6 +126,8 @@ public class Board {
         if (getPossibleMovements(initialPosition).contains(newPosition)) {
             pieces[newPosition.getX()][newPosition.getY()] = getPiece(initialPosition);
             pieces[initialPosition.getX()][initialPosition.getY()] = null;
+
+            switchTurn();
         }
     }
 
