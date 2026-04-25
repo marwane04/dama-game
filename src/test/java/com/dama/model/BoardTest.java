@@ -26,17 +26,41 @@ class BoardTest {
         Position positionInitiale = new Position(2, 0);
         Position nouvelPosition = new Position(3, 1);
 
-        assertTrue(board.getPossibleMouvements(positionInitiale).contains(nouvelPosition), "Mouvement has to be possible");
+        assertTrue(board.getPossibleMovements(positionInitiale).contains(nouvelPosition), "Mouvement has to be possible");
 
         board.movePiece(positionInitiale, nouvelPosition);
 
-        assertTrue(board.getPossibleMouvements(positionInitiale).isEmpty(), "The piece shouldn't be here");
+        assertTrue(board.getPossibleMovements(positionInitiale).isEmpty(), "The piece shouldn't be here");
     }
 
     @Test
-    void testPossibleMouvementsForAnEmptySquare() {
+    void testPossibleMovementsForAnEmptySquare() {
         Position caseVide = new Position(3, 1);
-        List<Position> mouvements = board.getPossibleMouvements(caseVide);
-        assertTrue(mouvements.isEmpty(), "There should not be mouvement for an empty square");
+        List<Position> movements = board.getPossibleMovements(caseVide);
+        assertTrue(movements.isEmpty(), "There should not be mouvement for an empty square");
+    }
+
+    @Test
+    void testCaptureMoveHasPriorityForPiece() {
+        board.movePiece(new Position(5, 3), new Position(4, 2));
+        board.movePiece(new Position(4, 2), new Position(3, 3));
+
+        Position blackPiece = new Position(2, 2);
+        Position captureLanding = new Position(4, 4);
+
+        List<Position> movements = board.getPossibleMovements(blackPiece);
+
+        assertEquals(1, movements.size(), "Only capture should be returned when available");
+        assertTrue(movements.contains(captureLanding), "Capture landing square should be returned");
+    }
+
+    @Test
+    void testCaptureMoveIsForcedGlobally() {
+        board.movePiece(new Position(5, 3), new Position(4, 2));
+        board.movePiece(new Position(4, 2), new Position(3, 3));
+
+        List<Position> movements = board.getPossibleMovements(new Position(2, 0));
+
+        assertTrue(movements.isEmpty(), "Non-capturing piece should have no moves when a capture exists");
     }
 }
