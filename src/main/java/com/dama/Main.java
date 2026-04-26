@@ -1,5 +1,6 @@
 package com.dama;
 
+import com.dama.model.Board;
 import com.dama.model.MockBoardModel;
 import com.dama.view.GameWindow;
 
@@ -10,8 +11,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        MockBoardModel model = new MockBoardModel();
-        GameWindow window = new GameWindow(primaryStage, model);
+        Board board = new Board();
+        GameWindow window = new GameWindow(primaryStage, board);
         window.show();
     }
 

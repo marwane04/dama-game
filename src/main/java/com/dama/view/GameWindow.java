@@ -1,6 +1,7 @@
 package com.dama.view;
 
 import com.dama.controller.GameController;
+import com.dama.model.Board;
 import com.dama.model.BoardModel;
 
 import javafx.application.Platform;
@@ -21,14 +22,14 @@ import java.beans.PropertyChangeListener;
 
 public class GameWindow implements CheckersView, PropertyChangeListener {
 
-    private final BoardModel model;
+    private final Board model;
     private GameController controller;
 
     private final Stage stage;
     private BoardView boardView;
     private Text statusText;
 
-    public GameWindow(Stage stage, BoardModel model) {
+    public GameWindow(Stage stage, Board model) {
         this.stage = stage;
         this.model = model;
         model.addPropertyChangeListener(this);
@@ -167,7 +168,7 @@ public class GameWindow implements CheckersView, PropertyChangeListener {
                 refreshBoard();
             }
             if ("gameOver".equals(evt.getPropertyName())) {
-                showGameOverMessage(model.getWinner());
+//                #TODO: showGameOverMessage(model.getWinner());
             }
         });
     }

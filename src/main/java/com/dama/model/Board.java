@@ -1,17 +1,24 @@
 package com.dama.model;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Board {
+public class Board{
     private final Piece[][] pieces = new Piece[8][8];
     private Color currentPlayer;
     private GameState state;
+
+    private PropertyChangeSupport support;
 
     public Board() {
         this.state = GameState.IN_PROGRESS;
         //always red starts 😊
         this.currentPlayer = Color.RED;
+
+        support = new PropertyChangeSupport(this);
+
         initBoard();
     }
 
@@ -127,6 +134,8 @@ public class Board {
             pieces[newPosition.getX()][newPosition.getY()] = getPiece(initialPosition);
             pieces[initialPosition.getX()][initialPosition.getY()] = null;
 
+            this.support.firePropertyChange("boardState", null, this.pieces);
+
             switchTurn();
         }
     }
@@ -164,6 +173,10 @@ public class Board {
         }
 
         return movements;
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
     }
 
 

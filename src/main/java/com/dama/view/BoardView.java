@@ -1,6 +1,8 @@
 package com.dama.view;
 
+import com.dama.model.Board;
 import com.dama.model.BoardModel;
+import com.dama.model.Piece;
 import com.dama.model.PieceType;
 import com.dama.controller.GameController;
 
@@ -34,7 +36,7 @@ public class BoardView extends GridPane {
     private static final Color BLACK_PIECE_EDGE = Color.web("#0D0D1A");
     private static final Color KING_COLOR     = Color.web("#FFD700");
 
-    private final BoardModel model;
+    private final Board model;
     private GameController controller;
 
     private int selectedRow = -1;
@@ -44,7 +46,7 @@ public class BoardView extends GridPane {
     // Grid of tile StackPanes for easy redraw
     private final StackPane[][] tiles = new StackPane[BOARD_SIZE][BOARD_SIZE];
 
-    public BoardView(BoardModel model) {
+    public BoardView(Board model) {
         this.model = model;
         setHgap(0);
         setVgap(0);
@@ -126,18 +128,16 @@ public class BoardView extends GridPane {
         }
 
         // ── Piece ──
-        PieceType piece = model.getPieceAt(row, col);
-        if (piece != PieceType.EMPTY) {
+        Piece piece = model.getPiece(row, col);
+        if (piece != null) {
             tile.getChildren().add(buildPiece(piece));
         }
     }
 
-    private StackPane buildPiece(PieceType piece) {
+    private StackPane buildPiece(Piece piece) {
         StackPane container = new StackPane();
         container.setMouseTransparent(true); // clicks pass through to tile
 
-        boolean isRed  = (piece == PieceType.RED  || piece == PieceType.RED_KING);
-        boolean isKing = (piece == PieceType.RED_KING || piece == PieceType.BLACK_KING);
 
         double radius = (TILE_SIZE / 2.0) - 10;
 
@@ -149,7 +149,7 @@ public class BoardView extends GridPane {
 
         // Piece body
         Circle body = new Circle(radius);
-        body.setFill(isRed ? RED_PIECE : BLACK_PIECE);
+        body.setFill(piece.getColor() == com.dama.model.Color.RED ? RED_PIECE : BLACK_PIECE);
 
         // Inner highlight (3D feel)
         InnerShadow inner = new InnerShadow();
@@ -162,13 +162,13 @@ public class BoardView extends GridPane {
         // Edge ring
         Circle edge = new Circle(radius);
         edge.setFill(Color.TRANSPARENT);
-        edge.setStroke(isRed ? RED_PIECE_EDGE : BLACK_PIECE_EDGE);
+        edge.setStroke(piece.getColor() == com.dama.model.Color.RED ? RED_PIECE_EDGE : BLACK_PIECE_EDGE);
         edge.setStrokeWidth(2.5);
 
         container.getChildren().addAll(shadow, body, edge);
 
         // King crown
-        if (isKing) {
+        if (piece.isKing()) {
             Text crown = new Text("♛");
             crown.setFont(Font.font("Serif", FontWeight.BOLD, 22));
             crown.setFill(KING_COLOR);
