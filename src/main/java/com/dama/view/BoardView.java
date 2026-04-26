@@ -1,5 +1,6 @@
 package com.dama.view;
 
+import com.dama.controller.GameController;
 import com.dama.model.Board;
 import com.dama.model.Piece;
 import javafx.scene.effect.DropShadow;

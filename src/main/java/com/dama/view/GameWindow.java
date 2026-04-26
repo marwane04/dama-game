@@ -1,5 +1,6 @@
 package com.dama.view;
 
+import com.dama.controller.GameController;
 import com.dama.model.Board;
 import javafx.application.Platform;
 import javafx.geometry.Insets;

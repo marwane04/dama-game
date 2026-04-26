@@ -143,8 +143,22 @@ public class Board {
 
     public void movePiece(Position initialPosition, Position newPosition) {
         if (getPossibleMovements(initialPosition).contains(newPosition)) {
-            pieces[newPosition.getX()][newPosition.getY()] = getPiece(initialPosition);
+            Piece moving = getPiece(initialPosition);
+            pieces[newPosition.getX()][newPosition.getY()] = moving;
             pieces[initialPosition.getX()][initialPosition.getY()] = null;
+
+            //check if the move is a capture move
+            int deltaX = newPosition.getX() - initialPosition.getX();
+            int deltaY = newPosition.getY() - initialPosition.getY();
+            if (Math.abs(deltaX) == 2 && Math.abs(deltaY) == 2) {
+                int jumpedX = initialPosition.getX() + (deltaX / 2);
+                int jumpedY = initialPosition.getY() + (deltaY / 2);
+                pieces[jumpedX][jumpedY] = null;
+            }
+
+            if (moving != null) {
+                moving.setPosition(newPosition.getX(), newPosition.getY());
+            }
 
             this.support.firePropertyChange("boardState", null, this.pieces);
 
