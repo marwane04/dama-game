@@ -38,6 +38,10 @@ public class Position {
         return isPlayable(this.x, this.y);
     }
 
+    public Position getMirrorPosition() {
+        return new Position(7 - this.x, 7 - this.y);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

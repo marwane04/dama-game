@@ -19,6 +19,33 @@ public class Client {
         }
     }
 
+    public interface MoveListener {
+        void onMoveReceived(Move move);
+    }
+
+    public interface StartListener {
+        void onStartAssigned(boolean isLocalTurn);
+    }
+
+    public interface WaitingListener {
+        void onWaitingForOpponent();
+    }
+
+    private MoveListener moveListener;
+    private StartListener startListener;
+    private WaitingListener waitingListener;
+
+    public void setMoveListener(MoveListener moveListener) {
+        this.moveListener = moveListener;
+    }
+
+    public void setStartListener(StartListener startListener) {
+        this.startListener = startListener;
+    }
+
+    public void setWaitingListener(WaitingListener waitingListener) {
+        this.waitingListener = waitingListener;
+    }
 
     public void sendMove(Move move) {
         if (writer == null || socket == null || socket.isClosed()) {
@@ -45,14 +72,41 @@ public class Client {
                             closeConnection();
                             break;
                         }
-                        System.out.println(receivedMove);
+                        if (receivedMove.startsWith("START:")) {
+                            handleStartMessage(receivedMove);
+                            continue;
+                        }
+                        if (receivedMove.startsWith("WAITING")) {
+                            handleWaitingMessage();
+                            continue;
+                        }
+                        if (moveListener != null) {
+                            moveListener.onMoveReceived(Move.stringToMove(receivedMove));
+                        }
                     } catch (IOException e) {
                         closeConnection();
                         break;
+                    } catch (IllegalArgumentException e) {
+                        // Ignore malformed messages and continue listening.
                     }
                 }
             }
         }).start();
+    }
+
+    private void handleStartMessage(String message) {
+        if (startListener == null) {
+            return;
+        }
+        String token = message.substring("START:".length()).trim();
+        boolean isLocalTurn = "YOU".equalsIgnoreCase(token);
+        startListener.onStartAssigned(isLocalTurn);
+    }
+
+    private void handleWaitingMessage() {
+        if (waitingListener != null) {
+            waitingListener.onWaitingForOpponent();
+        }
     }
 
     public void closeConnection() {

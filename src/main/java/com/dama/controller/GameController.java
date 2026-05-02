@@ -1,33 +1,56 @@
 package com.dama.controller;
 
-import com.dama.controller.players.Player;
-import com.dama.model.Board;
-import com.dama.model.Color;
-import com.dama.model.GameState;
-import com.dama.model.Piece;
-import com.dama.model.Position;
+import com.dama.model.*;
+import com.dama.network.Client;
+import com.dama.network.Move;
 import com.dama.view.CheckersView;
 import javafx.application.Platform;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class GameController {
 
     private final Board model;
     private final CheckersView view;
-    private final Player redPlayer;
-    private final Player blackPlayer;
+    private final GameType gameType;
+
+    private Client localClient;
+
+    private boolean isLocalTurn = true;
+    private boolean onlineReady = true;
 
     private Position selectedPosition;
     private List<Position> selectedMoves;
 
-    public GameController(Board model, CheckersView view, Player redPlayer, Player blackPlayer) {
+    public GameController(Board model, CheckersView view, GameType gameType) {
         this.model = model;
         this.view = view;
-        this.redPlayer = redPlayer;
-        this.blackPlayer = blackPlayer;
+        this.gameType = gameType;
+        updateStatusForCurrentPlayer();
+    }
+
+    public void setLocalClient(Client localClient) {
+        this.localClient = localClient;
+        if (this.localClient != null) {
+            if (gameType == GameType.ONLINE) {
+                onlineReady = false;
+                setLocalTurn(false);
+                this.localClient.setStartListener(isLocalTurn -> {
+                    onlineReady = true;
+                    setLocalTurn(isLocalTurn);
+                });
+                this.localClient.setWaitingListener(() -> {
+                    onlineReady = false;
+                    updateStatusForCurrentPlayer();
+                });
+            }
+            this.localClient.setMoveListener(this::handleRemoteMove);
+            this.localClient.listenForMoves();
+        }
+    }
+
+    public void setLocalTurn(boolean isLocalTurn) {
+        this.isLocalTurn = isLocalTurn;
         updateStatusForCurrentPlayer();
     }
 
@@ -36,11 +59,27 @@ public class GameController {
             return;
         }
 
+        if (gameType == GameType.ONLINE) {
+            if (!onlineReady) {
+                view.setStatusMessage("Waiting for opponent");
+                return;
+            }
+            if (!isLocalTurn) {
+                view.setStatusMessage("Opponent's turn");
+                return;
+            }
+        }
+
         Position clicked = new Position(row, col);
         Piece clickedPiece = model.getPiece(clicked);
 
         if (selectedPosition == null) {
-            if (clickedPiece == null || clickedPiece.getColor() != model.getCurrentPlayer()) {
+            if (gameType == GameType.ONLINE) {
+                if (clickedPiece == null || clickedPiece.getColor() != Color.RED) {
+                    view.setStatusMessage("Select a RED piece");
+                    return;
+                }
+            } else if (clickedPiece == null || clickedPiece.getColor() != model.getCurrentPlayer()) {
                 view.setStatusMessage("Select a " + model.getCurrentPlayer() + " piece");
                 return;
             }
@@ -53,13 +92,23 @@ public class GameController {
             return;
         }
 
-        if (clickedPiece != null && clickedPiece.getColor() == model.getCurrentPlayer()) {
-            selectPiece(clicked);
-            return;
+        if (clickedPiece != null) {
+            if (gameType == GameType.ONLINE && clickedPiece.getColor() == Color.RED) {
+                selectPiece(clicked);
+                return;
+            }
+            if (gameType != GameType.ONLINE && clickedPiece.getColor() == model.getCurrentPlayer()) {
+                selectPiece(clicked);
+                return;
+            }
         }
 
         if (isValidDestination(clicked)) {
             model.movePiece(selectedPosition, clicked);
+            if (gameType == GameType.ONLINE && localClient != null) {
+                localClient.sendMove((new Move(selectedPosition, clicked).getMirrorMove()));
+                isLocalTurn = false;
+            }
             clearSelection();
             updateStatusForCurrentPlayer();
         } else {
@@ -104,6 +153,30 @@ public class GameController {
     }
 
     private void updateStatusForCurrentPlayer() {
-        view.setStatusMessage(model.getCurrentPlayer() + "'s turn");
+        if (gameType == GameType.ONLINE) {
+            if (!onlineReady) {
+                view.setStatusMessage("Waiting for opponent");
+                return;
+            }
+            view.setStatusMessage(isLocalTurn ? "Your turn" : "Opponent's turn");
+        } else {
+            view.setStatusMessage(model.getCurrentPlayer() + "'s turn");
+            System.out.println("am i a joke to u");
+        }
+    }
+
+    private void handleRemoteMove(Move move) {
+        if (move == null || gameType != GameType.ONLINE) {
+            return;
+        }
+        Platform.runLater(() -> {
+            if (model.getState() != GameState.IN_PROGRESS) {
+                return;
+            }
+            clearSelection();
+            model.movePiece(move.getInitialPosition(), move.getTargetPosition());
+            isLocalTurn = true;
+            updateStatusForCurrentPlayer();
+        });
     }
 }

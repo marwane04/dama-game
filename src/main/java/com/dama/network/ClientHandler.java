@@ -18,6 +18,7 @@ public class ClientHandler implements Runnable {
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             clientHandlers.add(this);
             System.out.println("client added to the list");
+            assignStartingTurn();
         } catch (Exception e) {
             closeConnection();
         }
@@ -62,6 +63,35 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    private void assignStartingTurn() {
+        if (clientHandlers.size() == 1) {
+            sendWaitingMessage();
+            return;
+        }
+        if (clientHandlers.size() == 2) {
+            clientHandlers.get(0).sendStartMessage(true);
+            clientHandlers.get(1).sendStartMessage(false);
+        }
+    }
+
+    private void sendWaitingMessage() {
+        sendLine("WAITING");
+    }
+
+    private void sendStartMessage(boolean isLocalTurn) {
+        sendLine("START:" + (isLocalTurn ? "YOU" : "OPPONENT"));
+    }
+
+    private void sendLine(String line) {
+        try {
+            writer.write(line);
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            closeConnection();
+        }
+    }
+
     private void sendMoveToOpponent(Move move) {
         if (move == null) {
             return;
@@ -71,14 +101,8 @@ public class ClientHandler implements Runnable {
         if (clientHandlers.size() > 1) {
             otherClient = clientHandlers.get(0) != this ? clientHandlers.get(0) : clientHandlers.get(1);
         }
-        try {
-            if (otherClient != null) {
-                otherClient.writer.write(move.toString());
-                otherClient.writer.newLine();
-                otherClient.writer.flush();
-            }
-        } catch (IOException e) {
-            closeConnection();
+        if (otherClient != null) {
+            otherClient.sendLine(move.toString());
         }
 
     }

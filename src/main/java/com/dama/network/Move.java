@@ -11,6 +11,20 @@ public class Move {
         this.targetPosition = targetPosition;
     }
 
+    public Position getInitialPosition() {
+        return initialPosition;
+    }
+
+    public Position getTargetPosition() {
+        return targetPosition;
+    }
+
+    public Move getMirrorMove() {
+        return new Move(this.initialPosition.getMirrorPosition(),
+                this.targetPosition.getMirrorPosition());
+    }
+
+
     @Override
     public String toString() {
         return initialPosition.getX() + " " + initialPosition.getY() + " , " + targetPosition.getX() + " " + targetPosition.getY();

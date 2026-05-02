@@ -1,9 +1,8 @@
 package com.dama;
 
 import com.dama.controller.GameController;
-import com.dama.controller.players.LocalHumanPlayer;
+import com.dama.controller.GameType;
 import com.dama.model.Board;
-import com.dama.model.Color;
 import com.dama.view.GameWindow;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -17,9 +16,9 @@ public class Main extends Application {
         GameController controller = new GameController(
                 board,
                 window,
-                new LocalHumanPlayer(Color.RED),
-                new LocalHumanPlayer(Color.BLACK)
+                GameType.LOCAL_TWO_PAYERS
         );
+        controller.setLocalClient(new com.dama.network.Client());
         window.setController(controller);
         window.show();
     }

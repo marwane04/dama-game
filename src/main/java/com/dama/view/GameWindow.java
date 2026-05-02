@@ -129,7 +129,7 @@ public class GameWindow implements CheckersView, PropertyChangeListener {
     @Override
     public void refreshBoard() {
         boardView.refresh();
-        statusText.setText(model.getCurrentPlayer() + "'s turn");
+//        statusText.setText(model.getCurrentPlayer() + "'s turn");
     }
 
     @Override
