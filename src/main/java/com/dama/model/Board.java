@@ -5,12 +5,12 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Board{
+public class Board {
     private final Piece[][] pieces = new Piece[8][8];
     private Color currentPlayer;
     private GameState state;
 
-    private PropertyChangeSupport support;
+    private final PropertyChangeSupport support;
 
     public Board() {
         this.state = GameState.IN_PROGRESS;
@@ -67,11 +67,23 @@ public class Board{
     }
 
     public void switchTurn() {
-        if(this.currentPlayer == Color.BLACK) {
+        if (this.currentPlayer == Color.BLACK) {
             this.currentPlayer = Color.RED;
         } else {
             this.currentPlayer = Color.BLACK;
         }
+    }
+
+    public void reset() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                pieces[i][j] = null;
+            }
+        }
+        this.state = GameState.IN_PROGRESS;
+        this.currentPlayer = Color.RED;
+        initBoard();
+        this.support.firePropertyChange("boardState", null, this.pieces);
     }
 
     /**
@@ -83,7 +95,7 @@ public class Board{
 
     private List<Position> getCaptureMoves(Position position) {
         Piece piece = getPiece(position);
-        if(piece == null) return new ArrayList<>();
+        if (piece == null) return new ArrayList<>();
 
         List<Position> captures = new ArrayList<>();
         Position[] candidates;
@@ -131,8 +143,22 @@ public class Board{
 
     public void movePiece(Position initialPosition, Position newPosition) {
         if (getPossibleMovements(initialPosition).contains(newPosition)) {
-            pieces[newPosition.getX()][newPosition.getY()] = getPiece(initialPosition);
+            Piece moving = getPiece(initialPosition);
+            pieces[newPosition.getX()][newPosition.getY()] = moving;
             pieces[initialPosition.getX()][initialPosition.getY()] = null;
+
+            //check if the move is a capture move
+            int deltaX = newPosition.getX() - initialPosition.getX();
+            int deltaY = newPosition.getY() - initialPosition.getY();
+            if (Math.abs(deltaX) == 2 && Math.abs(deltaY) == 2) {
+                int jumpedX = initialPosition.getX() + (deltaX / 2);
+                int jumpedY = initialPosition.getY() + (deltaY / 2);
+                pieces[jumpedX][jumpedY] = null;
+            }
+
+            if (moving != null) {
+                moving.setPosition(newPosition.getX(), newPosition.getY());
+            }
 
             this.support.firePropertyChange("boardState", null, this.pieces);
 

@@ -2,8 +2,6 @@ package com.dama.view;
 
 import com.dama.controller.GameController;
 import com.dama.model.Board;
-import com.dama.model.BoardModel;
-
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -53,7 +51,7 @@ public class GameWindow implements CheckersView, PropertyChangeListener {
         // Root layout
         HBox root = new HBox(0, boardView, sidebar);
         root.setBackground(new Background(new BackgroundFill(
-            Color.web("#1A1A2E"), CornerRadii.EMPTY, Insets.EMPTY
+                Color.web("#1A1A2E"), CornerRadii.EMPTY, Insets.EMPTY
         )));
 
         Scene scene = new Scene(root);
@@ -68,7 +66,7 @@ public class GameWindow implements CheckersView, PropertyChangeListener {
         sidebar.setAlignment(Pos.CENTER);
         sidebar.setPadding(new Insets(30, 15, 30, 15));
         sidebar.setBackground(new Background(new BackgroundFill(
-            Color.web("#16213E"), CornerRadii.EMPTY, Insets.EMPTY
+                Color.web("#16213E"), CornerRadii.EMPTY, Insets.EMPTY
         )));
 
         // Title
@@ -84,10 +82,14 @@ public class GameWindow implements CheckersView, PropertyChangeListener {
 
         // Buttons
         Button newGameBtn = createButton("New Game");
-        Button quitBtn    = createButton("Quit");
+        Button quitBtn = createButton("Quit");
 
-        newGameBtn.setOnAction(e -> { if (controller != null) controller.onNewGame(); });
-        quitBtn.setOnAction(e    -> { if (controller != null) controller.onQuit(); });
+        newGameBtn.setOnAction(e -> {
+            if (controller != null) controller.onNewGame();
+        });
+        quitBtn.setOnAction(e -> {
+            if (controller != null) controller.onQuit();
+        });
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -102,22 +104,22 @@ public class GameWindow implements CheckersView, PropertyChangeListener {
         btn.setPrefHeight(40);
         btn.setFont(Font.font("SansSerif", FontWeight.BOLD, 13));
         btn.setStyle(
-            "-fx-background-color: #0F3460;" +
-            "-fx-text-fill: white;" +
-            "-fx-background-radius: 6;" +
-            "-fx-cursor: hand;"
+                "-fx-background-color: #0F3460;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;"
         );
         btn.setOnMouseEntered(e -> btn.setStyle(
-            "-fx-background-color: #E94560;" +
-            "-fx-text-fill: white;" +
-            "-fx-background-radius: 6;" +
-            "-fx-cursor: hand;"
+                "-fx-background-color: #E94560;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;"
         ));
         btn.setOnMouseExited(e -> btn.setStyle(
-            "-fx-background-color: #0F3460;" +
-            "-fx-text-fill: white;" +
-            "-fx-background-radius: 6;" +
-            "-fx-cursor: hand;"
+                "-fx-background-color: #0F3460;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;"
         ));
         return btn;
     }

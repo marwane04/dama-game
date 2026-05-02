@@ -1,21 +1,18 @@
 package com.dama.view;
 
-import com.dama.model.Board;
-import com.dama.model.BoardModel;
-import com.dama.model.Piece;
-import com.dama.model.PieceType;
 import com.dama.controller.GameController;
-
+import com.dama.model.Board;
+import com.dama.model.Piece;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Text;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.InnerShadow;
+import javafx.scene.text.Text;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,18 +20,18 @@ import java.util.Set;
 public class BoardView extends GridPane {
 
     private static final int BOARD_SIZE = 8;
-    private static final int TILE_SIZE  = 80;
+    private static final int TILE_SIZE = 80;
 
     // Colors — dark wood aesthetic
-    private static final Color DARK_TILE      = Color.web("#5C3317");
-    private static final Color LIGHT_TILE     = Color.web("#F0D9B5");
-    private static final Color HIGHLIGHT      = Color.web("#50C87880"); // green, semi-transparent
-    private static final Color SELECTED_TILE  = Color.web("#FFD70080"); // gold, semi-transparent
-    private static final Color RED_PIECE      = Color.web("#C0392B");
+    private static final Color DARK_TILE = Color.web("#5C3317");
+    private static final Color LIGHT_TILE = Color.web("#F0D9B5");
+    private static final Color HIGHLIGHT = Color.web("#50C87880"); // green, semi-transparent
+    private static final Color SELECTED_TILE = Color.web("#FFD70080"); // gold, semi-transparent
+    private static final Color RED_PIECE = Color.web("#C0392B");
     private static final Color RED_PIECE_EDGE = Color.web("#922B21");
-    private static final Color BLACK_PIECE    = Color.web("#1A1A2E");
+    private static final Color BLACK_PIECE = Color.web("#1A1A2E");
     private static final Color BLACK_PIECE_EDGE = Color.web("#0D0D1A");
-    private static final Color KING_COLOR     = Color.web("#FFD700");
+    private static final Color KING_COLOR = Color.web("#FFD700");
 
     private final Board model;
     private GameController controller;
