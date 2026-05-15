@@ -2,30 +2,28 @@ package com.dama.network;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 
 public class ClientHandler implements Runnable {
-    private static final ArrayList<ClientHandler> clientHandlers = new ArrayList<>(2);
+    private final SessionManager sessionManager;
 
     private Socket socket;
     private BufferedReader reader;
     private BufferedWriter writer;
 
-    public ClientHandler(Socket socket) {
+    public ClientHandler(Socket socket, SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
         try {
             this.socket = socket;
             this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            clientHandlers.add(this);
             System.out.println("client added to the list");
-            assignStartingTurn();
         } catch (Exception e) {
             closeConnection();
         }
     }
 
     public void closeConnection() {
-        removeClient();
+        sessionManager.removeClient(this);
         try {
             if (writer != null) {
                 writer.close();
@@ -47,6 +45,9 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
+        if (!registerSession()) {
+            return;
+        }
         while (socket != null && socket.isConnected()) {
             try {
                 String receivedString = reader.readLine();
@@ -54,35 +55,61 @@ public class ClientHandler implements Runnable {
                     closeConnection();
                     break;
                 }
+                if (receivedString.startsWith("SESSION:")) {
+                    continue;
+                }
                 Move receivedMove = Move.stringToMove(receivedString);
-                sendMoveToOpponent(receivedMove);
+                sessionManager.forwardMove(this, receivedMove);
             } catch (IOException e) {
                 closeConnection();
                 break;
+            } catch (IllegalArgumentException e) {
+                // Ignore malformed messages and continue listening.
             }
         }
     }
 
-    private void assignStartingTurn() {
-        if (clientHandlers.size() == 1) {
-            sendWaitingMessage();
-            return;
-        }
-        if (clientHandlers.size() == 2) {
-            clientHandlers.get(0).sendStartMessage(true);
-            clientHandlers.get(1).sendStartMessage(false);
+    private boolean registerSession() {
+        try {
+            String firstLine = reader.readLine();
+            if (firstLine == null) {
+                closeConnection();
+                return false;
+            }
+            if (firstLine.startsWith("SESSION:JOIN:")) {
+                String code = firstLine.substring("SESSION:JOIN:".length()).trim();
+                return sessionManager.registerJoin(this, code);
+            }
+            if (firstLine.startsWith("SESSION:NEW")) {
+                sessionManager.registerNew(this);
+                return true;
+            }
+            sessionManager.registerNew(this);
+            Move initialMove = Move.stringToMove(firstLine);
+            sessionManager.forwardMove(this, initialMove);
+            return true;
+        } catch (IOException e) {
+            closeConnection();
+            return false;
+        } catch (IllegalArgumentException e) {
+            sessionManager.registerNew(this);
+            return true;
         }
     }
 
-    private void sendWaitingMessage() {
+    public void sendWaitingMessage() {
         sendLine("WAITING");
     }
 
-    private void sendStartMessage(boolean isLocalTurn) {
+    public void sendStartMessage(boolean isLocalTurn) {
         sendLine("START:" + (isLocalTurn ? "YOU" : "OPPONENT"));
     }
 
-    private void sendLine(String line) {
+    public void sendSessionCode(String code) {
+        sendLine("SESSION:CODE:" + code);
+    }
+
+    public void sendLine(String line) {
         try {
             writer.write(line);
             writer.newLine();
@@ -90,24 +117,5 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             closeConnection();
         }
-    }
-
-    private void sendMoveToOpponent(Move move) {
-        if (move == null) {
-            return;
-        }
-
-        ClientHandler otherClient = null;
-        if (clientHandlers.size() > 1) {
-            otherClient = clientHandlers.get(0) != this ? clientHandlers.get(0) : clientHandlers.get(1);
-        }
-        if (otherClient != null) {
-            otherClient.sendLine(move.toString());
-        }
-
-    }
-
-    private void removeClient() {
-        clientHandlers.remove(this);
     }
 }
