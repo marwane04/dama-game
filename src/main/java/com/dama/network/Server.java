@@ -7,9 +7,11 @@ import java.net.Socket;
 public class Server {
 
     private final ServerSocket socket;
+    private final SessionManager sessionManager;
 
-    public Server(ServerSocket socket) {
+    public Server(ServerSocket socket, SessionManager sessionManager) {
         this.socket = socket;
+        this.sessionManager = sessionManager;
     }
 
     private void startServer() {
@@ -18,7 +20,7 @@ public class Server {
                 Socket clientSocket = socket.accept();
                 System.out.println("client connected");
 
-                Thread thread = new Thread(new ClientHandler(clientSocket));
+                Thread thread = new Thread(new ClientHandler(clientSocket, sessionManager));
                 thread.start();
             }
         } catch (IOException e) {
@@ -38,7 +40,7 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(1234);
-        Server server = new Server(serverSocket);
+        Server server = new Server(serverSocket, new SessionManager());
         server.startServer();
     }
 
