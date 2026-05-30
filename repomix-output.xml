@@ -1,0 +1,1885 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+.repomixignore
+pom.xml
+README.md
+repomix.config.json
+src/main/java/com/dama/controller/GameController.java
+src/main/java/com/dama/controller/GameType.java
+src/main/java/com/dama/Main.java
+src/main/java/com/dama/model/Board.java
+src/main/java/com/dama/model/Color.java
+src/main/java/com/dama/model/GameState.java
+src/main/java/com/dama/model/Piece.java
+src/main/java/com/dama/model/Position.java
+src/main/java/com/dama/network/Client.java
+src/main/java/com/dama/network/ClientHandler.java
+src/main/java/com/dama/network/Move.java
+src/main/java/com/dama/network/Server.java
+src/main/java/com/dama/network/Session.java
+src/main/java/com/dama/network/SessionManager.java
+src/main/java/com/dama/view/BoardView.java
+src/main/java/com/dama/view/CheckersView.java
+src/main/java/com/dama/view/GameWindow.java
+src/test/java/com/dama/model/BoardTest.java
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".repomixignore">
+# --- Build & Output Directories ---
+**/target/
+**/build/
+**/.gradle/
+
+# --- Compiled Java Files & Binaries ---
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+**/*.zip
+**/*.tar.gz
+
+# --- IDE & Editor Metadata ---
+# IntelliJ IDEA
+**/.idea/
+**/*.iml
+**/*.ipr
+**/*.iws
+
+# Eclipse
+**/.settings/
+**/.project
+**/.classpath
+
+# VS Code
+**/.vscode/
+
+# --- Standard System Logs & Temporary Files ---
+**/*.log
+**/tmp/
+**/.DS_Store
+Thumbs.db
+</file>
+
+<file path="repomix.config.json">
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 52428800
+  },
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "compress": false,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "truncateBase64": false,
+    "copyToClipboard": false,
+    "includeFullDirectoryStructure": false,
+    "tokenCountTree": false,
+    "git": {
+      "sortByChanges": true,
+      "sortByChangesMaxCommits": 100,
+      "includeDiffs": false,
+      "includeLogs": false,
+      "includeLogsCount": 50
+    }
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDotIgnore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": []
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
+</file>
+
+<file path=".gitignore">
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.kotlin
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+</file>
+
+<file path="src/main/java/com/dama/controller/GameType.java">
+package com.dama.controller;
+
+public enum GameType {
+    LOCAL_TWO_PAYERS,
+    LOCAL_VS_AI,
+    ONLINE
+}
+</file>
+
+<file path="src/main/java/com/dama/model/Color.java">
+package com.dama.model;
+
+public enum Color {
+    RED,
+    BLACK
+}
+</file>
+
+<file path="src/main/java/com/dama/model/GameState.java">
+package com.dama.model;
+
+public enum GameState {
+    IN_PROGRESS,
+    RED_WINS,
+    BLACK_WINS,
+    DRAW
+}
+</file>
+
+<file path="src/main/java/com/dama/network/Session.java">
+package com.dama.network;
+
+public class Session {
+    private final String code;
+    private final ClientHandler playerOne;
+    private final ClientHandler playerTwo;
+
+    public Session(String code, ClientHandler playerOne, ClientHandler playerTwo) {
+        this.code = code;
+        this.playerOne = playerOne;
+        this.playerTwo = playerTwo;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void start() {
+        playerOne.sendStartMessage(true);
+        playerTwo.sendStartMessage(false);
+    }
+
+    public ClientHandler getOpponent(ClientHandler client) {
+        if (client == playerOne) {
+            return playerTwo;
+        }
+        if (client == playerTwo) {
+            return playerOne;
+        }
+        return null;
+    }
+
+    public void forwardMove(ClientHandler from, Move move) {
+        ClientHandler opponent = getOpponent(from);
+        if (opponent != null) {
+            opponent.sendLine(move.toString());
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/dama/network/SessionManager.java">
+package com.dama.network;
+
+import java.security.SecureRandom;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class SessionManager {
+    private static final int CODE_LENGTH = 6;
+    private static final String CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    private final SecureRandom random = new SecureRandom();
+    private final Map<String, ClientHandler> waitingByCode = new ConcurrentHashMap<>();
+    private final Map<String, Session> sessionsByCode = new ConcurrentHashMap<>();
+    private final Map<ClientHandler, String> codeByClient = new ConcurrentHashMap<>();
+
+    public String registerNew(ClientHandler client) {
+        String code = generateUniqueCode();
+        waitingByCode.put(code, client);
+        codeByClient.put(client, code);
+        client.sendSessionCode(code);
+        client.sendWaitingMessage();
+        return code;
+    }
+
+    public boolean registerJoin(ClientHandler client, String code) {
+        if (code == null || code.isBlank()) {
+            client.sendLine("SESSION:INVALID");
+            client.closeConnection();
+            return false;
+        }
+        ClientHandler waiting = waitingByCode.remove(code);
+        if (waiting == null) {
+            client.sendLine("SESSION:INVALID");
+            client.closeConnection();
+            return false;
+        }
+        Session session = new Session(code, waiting, client);
+        sessionsByCode.put(code, session);
+        codeByClient.put(waiting, code);
+        codeByClient.put(client, code);
+        session.start();
+        return true;
+    }
+
+    public void forwardMove(ClientHandler from, Move move) {
+        if (from == null || move == null) {
+            return;
+        }
+        String code = codeByClient.get(from);
+        if (code == null) {
+            return;
+        }
+        Session session = sessionsByCode.get(code);
+        if (session != null) {
+            session.forwardMove(from, move);
+        }
+    }
+
+    public void removeClient(ClientHandler client) {
+        if (client == null) {
+            return;
+        }
+        String code = codeByClient.remove(client);
+        if (code == null) {
+            return;
+        }
+        ClientHandler waiting = waitingByCode.get(code);
+        if (waiting == client) {
+            waitingByCode.remove(code);
+            return;
+        }
+        Session session = sessionsByCode.remove(code);
+        if (session == null) {
+            return;
+        }
+        ClientHandler opponent = session.getOpponent(client);
+        if (opponent != null) {
+            waitingByCode.put(code, opponent);
+            opponent.sendWaitingMessage();
+        }
+    }
+
+    private String generateUniqueCode() {
+        String code;
+        do {
+            code = generateCode();
+        } while (waitingByCode.containsKey(code) || sessionsByCode.containsKey(code));
+        return code;
+    }
+
+    private String generateCode() {
+        StringBuilder builder = new StringBuilder(CODE_LENGTH);
+        for (int i = 0; i < CODE_LENGTH; i++) {
+            int index = random.nextInt(CODE_CHARS.length());
+            builder.append(CODE_CHARS.charAt(index));
+        }
+        return builder.toString();
+    }
+}
+</file>
+
+<file path="README.md">
+# Jeu de Dames (Checkers) - Java
+
+Ce projet vise a developper une version du jeu de Dames (Checkers) en Java, avec une interface graphique JavaFX.
+
+Le jeu de Dames est un jeu strategique a deux joueurs ou :
+- les pions se deplacent en diagonale ;
+- les captures se font en sautant par-dessus les pions adverses ;
+- lorsqu'un pion atteint l'extremite opposee du plateau, il devient une dame, avec davantage de liberte de mouvement.
+
+## Prerequis
+
+- Java 17 (JDK 17)
+- Maven (build et gestion des dependances)
+
+## Construction du projet
+
+```bash
+mvn clean compile
+```
+
+## Execution (si une classe principale est configuree)
+
+```bash
+mvn exec:java
+```
+</file>
+
+<file path="src/main/java/com/dama/model/Piece.java">
+package com.dama.model;
+
+public class Piece {
+    private final Color color;
+    private Position position;
+    private boolean isKing;
+
+    public Piece(Color color, Position position) {
+        this.color = color;
+        this.position = position;
+        this.isKing = false;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
+    }
+
+    public void setPosition(int x, int y) {
+        this.position.setX(x);
+        this.position.setY(y);
+    }
+
+    public boolean isKing() {
+        return isKing;
+    }
+
+    public void setKing() {
+        this.isKing = true;
+    }
+
+}
+</file>
+
+<file path="src/main/java/com/dama/network/Move.java">
+package com.dama.network;
+
+import com.dama.model.Position;
+
+public class Move {
+    private final Position initialPosition;
+    private final Position targetPosition;
+
+    public Move(Position initialPosition, Position targetPosition) {
+        this.initialPosition = initialPosition;
+        this.targetPosition = targetPosition;
+    }
+
+    public Position getInitialPosition() {
+        return initialPosition;
+    }
+
+    public Position getTargetPosition() {
+        return targetPosition;
+    }
+
+    public Move getMirrorMove() {
+        return new Move(this.initialPosition.getMirrorPosition(),
+                this.targetPosition.getMirrorPosition());
+    }
+
+
+    @Override
+    public String toString() {
+        return initialPosition.getX() + " " + initialPosition.getY() + " , " + targetPosition.getX() + " " + targetPosition.getY();
+    }
+
+    /**
+     * Parses a move from the format produced by toString(): "x y , x y".
+     */
+    public static Move stringToMove(String string) {
+        if (string == null) {
+            throw new IllegalArgumentException("Move string is null");
+        }
+
+        String[] parts = string.trim().split(",");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid move format: " + string);
+        }
+
+        int[] coords = new int[4];
+        int index = 0;
+        for (String part : parts) {
+            String[] tokens = part.trim().split("\\s+");
+            if (tokens.length != 2) {
+                throw new IllegalArgumentException("Invalid move format: " + string);
+            }
+            coords[index++] = Integer.parseInt(tokens[0]);
+            coords[index++] = Integer.parseInt(tokens[1]);
+        }
+
+        Position initial = new Position(coords[0], coords[1]);
+        Position target = new Position(coords[2], coords[3]);
+
+        return new Move(initial, target);
+    }
+}
+</file>
+
+<file path="src/main/java/com/dama/network/Server.java">
+package com.dama.network;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server {
+
+    private final ServerSocket socket;
+    private final SessionManager sessionManager;
+
+    public Server(ServerSocket socket, SessionManager sessionManager) {
+        this.socket = socket;
+        this.sessionManager = sessionManager;
+    }
+
+    private void startServer() {
+        try {
+            while (!socket.isClosed()) {
+                Socket clientSocket = socket.accept();
+                System.out.println("client connected");
+
+                Thread thread = new Thread(new ClientHandler(clientSocket, sessionManager));
+                thread.start();
+            }
+        } catch (IOException e) {
+            closeConnection();
+        }
+    }
+
+    private void closeConnection() {
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        ServerSocket serverSocket = new ServerSocket(1234);
+        Server server = new Server(serverSocket, new SessionManager());
+        server.startServer();
+    }
+
+}
+</file>
+
+<file path="src/main/java/com/dama/view/CheckersView.java">
+package com.dama.view;
+
+public interface CheckersView {
+
+    // Refresh the entire board display
+    void refreshBoard();
+
+    // Highlight valid move squares for a selected piece
+    void highlightSquares(int[][] squares);
+
+    // Clear all highlights
+    void clearHighlights();
+
+    // Update the status message (e.g. "Red's turn")
+    void setStatusMessage(String message);
+
+    // Show a dialog when game ends
+    void showGameOverMessage(String winner);
+
+    // Launch and show the window
+    void show();
+}
+</file>
+
+<file path="src/test/java/com/dama/model/BoardTest.java">
+package com.dama.model;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class BoardTest {
+
+    private Board board;
+
+    @BeforeEach
+    void setUp() {
+        board = new Board();
+    }
+
+    @Test
+    void testInitialState() {
+        assertEquals(GameState.IN_PROGRESS, board.getState());
+    }
+
+    @Test
+    void testMovePiece() {
+        Position positionInitiale = new Position(2, 0);
+        Position nouvelPosition = new Position(3, 1);
+
+        assertTrue(board.getPossibleMovements(positionInitiale).contains(nouvelPosition), "Mouvement has to be possible");
+
+        board.movePiece(positionInitiale, nouvelPosition);
+
+        assertTrue(board.getPossibleMovements(positionInitiale).isEmpty(), "The piece shouldn't be here");
+    }
+
+    @Test
+    void testPossibleMovementsForAnEmptySquare() {
+        Position caseVide = new Position(3, 1);
+        List<Position> movements = board.getPossibleMovements(caseVide);
+        assertTrue(movements.isEmpty(), "There should not be mouvement for an empty square");
+    }
+
+    @Test
+    void testCaptureMoveHasPriorityForPiece() {
+        board.movePiece(new Position(5, 3), new Position(4, 2));
+        board.movePiece(new Position(4, 2), new Position(3, 3));
+
+        Position blackPiece = new Position(2, 2);
+        Position captureLanding = new Position(4, 4);
+
+        List<Position> movements = board.getPossibleMovements(blackPiece);
+
+        assertEquals(1, movements.size(), "Only capture should be returned when available");
+        assertTrue(movements.contains(captureLanding), "Capture landing square should be returned");
+    }
+
+    @Test
+    void testCaptureMoveIsForcedGlobally() {
+        board.movePiece(new Position(5, 3), new Position(4, 2));
+        board.movePiece(new Position(4, 2), new Position(3, 3));
+
+        List<Position> movements = board.getPossibleMovements(new Position(2, 0));
+
+        assertTrue(movements.isEmpty(), "Non-capturing piece should have no moves when a capture exists");
+    }
+}
+</file>
+
+<file path="src/main/java/com/dama/controller/GameController.java">
+package com.dama.controller;
+
+import com.dama.model.*;
+import com.dama.network.Client;
+import com.dama.network.Move;
+import com.dama.view.CheckersView;
+import javafx.application.Platform;
+
+import java.util.List;
+
+public class GameController {
+
+    private final Board model;
+    private final CheckersView view;
+    private final GameType gameType;
+
+    private Client localClient;
+
+    private boolean isLocalTurn = true;
+    private boolean onlineReady = true;
+
+    private Position selectedPosition;
+    private List<Position> selectedMoves;
+
+    public GameController(Board model, CheckersView view, GameType gameType) {
+        this.model = model;
+        this.view = view;
+        this.gameType = gameType;
+        updateStatusForCurrentPlayer();
+    }
+
+    public void setLocalClient(Client localClient) {
+        this.localClient = localClient;
+        if (this.localClient != null) {
+            if (gameType == GameType.ONLINE) {
+                onlineReady = false;
+                setLocalTurn(false);
+                this.localClient.setStartListener(isLocalTurn -> {
+                    onlineReady = true;
+                    setLocalTurn(isLocalTurn);
+                });
+                this.localClient.setWaitingListener(() -> {
+                    onlineReady = false;
+                    updateStatusForCurrentPlayer();
+                });
+            }
+            this.localClient.setMoveListener(this::handleRemoteMove);
+            this.localClient.listenForMoves();
+        }
+    }
+
+    public void setLocalTurn(boolean isLocalTurn) {
+        this.isLocalTurn = isLocalTurn;
+        updateStatusForCurrentPlayer();
+    }
+
+    public void onSquareSelected(int row, int col) {
+        if (model.getState() != GameState.IN_PROGRESS) {
+            return;
+        }
+
+        if (gameType == GameType.ONLINE) {
+            if (!onlineReady) {
+                view.setStatusMessage("Waiting for opponent");
+                return;
+            }
+            if (!isLocalTurn) {
+                view.setStatusMessage("Opponent's turn");
+                return;
+            }
+        }
+
+        Position clicked = new Position(row, col);
+        Piece clickedPiece = model.getPiece(clicked);
+
+        if (selectedPosition == null) {
+            if (gameType == GameType.ONLINE) {
+                if (clickedPiece == null || clickedPiece.getColor() != Color.RED) {
+                    view.setStatusMessage("Select a RED piece");
+                    return;
+                }
+            } else if (clickedPiece == null || clickedPiece.getColor() != model.getCurrentPlayer()) {
+                view.setStatusMessage("Select a " + model.getCurrentPlayer() + " piece");
+                return;
+            }
+            selectPiece(clicked);
+            return;
+        }
+
+        if (selectedPosition.equals(clicked)) {
+            clearSelection();
+            return;
+        }
+
+        if (clickedPiece != null) {
+            if (gameType == GameType.ONLINE && clickedPiece.getColor() == Color.RED) {
+                selectPiece(clicked);
+                return;
+            }
+            if (gameType != GameType.ONLINE && clickedPiece.getColor() == model.getCurrentPlayer()) {
+                selectPiece(clicked);
+                return;
+            }
+        }
+
+        if (isValidDestination(clicked)) {
+            model.movePiece(selectedPosition, clicked);
+            if (gameType == GameType.ONLINE && localClient != null) {
+                localClient.sendMove((new Move(selectedPosition, clicked).getMirrorMove()));
+                isLocalTurn = false;
+            }
+            clearSelection();
+            updateStatusForCurrentPlayer();
+        } else {
+            view.setStatusMessage("Invalid move");
+        }
+    }
+
+    public void onNewGame() {
+        model.reset();
+        clearSelection();
+        updateStatusForCurrentPlayer();
+    }
+
+    public void onQuit() {
+        Platform.exit();
+    }
+
+    private void selectPiece(Position position) {
+        selectedPosition = position;
+        selectedMoves = model.getPossibleMovements(position);
+        view.highlightSquares(toSquaresArray(selectedMoves));
+    }
+
+    private void clearSelection() {
+        selectedPosition = null;
+        selectedMoves = null;
+        view.clearHighlights();
+    }
+
+    private boolean isValidDestination(Position position) {
+        return selectedMoves != null && selectedMoves.contains(position);
+    }
+
+    private int[][] toSquaresArray(List<Position> positions) {
+        if (positions == null || positions.isEmpty()) return new int[0][0];
+        int[][] squares = new int[positions.size()][2];
+        for (int i = 0; i < positions.size(); i++) {
+            squares[i][0] = positions.get(i).getX();
+            squares[i][1] = positions.get(i).getY();
+        }
+        return squares;
+    }
+
+    private void updateStatusForCurrentPlayer() {
+        if (gameType == GameType.ONLINE) {
+            if (!onlineReady) {
+                view.setStatusMessage("Waiting for opponent");
+                return;
+            }
+            view.setStatusMessage(isLocalTurn ? "Your turn" : "Opponent's turn");
+        } else {
+            view.setStatusMessage(model.getCurrentPlayer() + "'s turn");
+            System.out.println("am i a joke to u");
+        }
+    }
+
+    private void handleRemoteMove(Move move) {
+        if (move == null || gameType != GameType.ONLINE) {
+            return;
+        }
+        Platform.runLater(() -> {
+            if (model.getState() != GameState.IN_PROGRESS) {
+                return;
+            }
+            clearSelection();
+            model.movePiece(move.getInitialPosition(), move.getTargetPosition());
+            isLocalTurn = true;
+            updateStatusForCurrentPlayer();
+        });
+    }
+}
+</file>
+
+<file path="src/main/java/com/dama/network/Client.java">
+package com.dama.network;
+
+import java.io.*;
+import java.net.Socket;
+
+public class Client {
+    private BufferedReader reader;
+    private BufferedWriter writer;
+    private Socket socket;
+    private final String sessionCode;
+
+    public Client() {
+        this(null);
+    }
+
+    public Client(String sessionCode) {
+        this.sessionCode = sessionCode;
+        try {
+            this.socket = new Socket("localhost", 1234);
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            sendSessionRequest();
+        } catch (IOException e) {
+            closeConnection();
+        }
+    }
+
+    public interface MoveListener {
+        void onMoveReceived(Move move);
+    }
+
+    public interface StartListener {
+        void onStartAssigned(boolean isLocalTurn);
+    }
+
+    public interface WaitingListener {
+        void onWaitingForOpponent();
+    }
+
+    public interface SessionCodeListener {
+        void onSessionCodeAssigned(String code);
+    }
+
+    public interface SessionErrorListener {
+        void onSessionError(String message);
+    }
+
+    private MoveListener moveListener;
+    private StartListener startListener;
+    private WaitingListener waitingListener;
+    private SessionCodeListener sessionCodeListener;
+    private SessionErrorListener sessionErrorListener;
+
+    public void setMoveListener(MoveListener moveListener) {
+        this.moveListener = moveListener;
+    }
+
+    public void setStartListener(StartListener startListener) {
+        this.startListener = startListener;
+    }
+
+    public void setWaitingListener(WaitingListener waitingListener) {
+        this.waitingListener = waitingListener;
+    }
+
+    public void setSessionCodeListener(SessionCodeListener sessionCodeListener) {
+        this.sessionCodeListener = sessionCodeListener;
+    }
+
+    public void setSessionErrorListener(SessionErrorListener sessionErrorListener) {
+        this.sessionErrorListener = sessionErrorListener;
+    }
+
+    public void sendMove(Move move) {
+        if (writer == null || socket == null || socket.isClosed()) {
+            closeConnection();
+            return;
+        }
+        try {
+            writer.write(move.toString());
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            closeConnection();
+        }
+    }
+
+    public void listenForMoves() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (socket != null && socket.isConnected() && !socket.isClosed()) {
+                    try {
+                        String receivedMove = reader.readLine();
+                        if (receivedMove == null) {
+                            closeConnection();
+                            break;
+                        }
+                        if (receivedMove.startsWith("SESSION:CODE:")) {
+                            handleSessionCode(receivedMove);
+                            continue;
+                        }
+                        if (receivedMove.startsWith("SESSION:INVALID")) {
+                            handleSessionError(receivedMove);
+                            continue;
+                        }
+                        if (receivedMove.startsWith("START:")) {
+                            handleStartMessage(receivedMove);
+                            continue;
+                        }
+                        if (receivedMove.startsWith("WAITING")) {
+                            handleWaitingMessage();
+                            continue;
+                        }
+                        if (moveListener != null) {
+                            moveListener.onMoveReceived(Move.stringToMove(receivedMove));
+                        }
+                    } catch (IOException e) {
+                        closeConnection();
+                        break;
+                    } catch (IllegalArgumentException e) {
+                        // Ignore malformed messages and continue listening.
+                    }
+                }
+            }
+        }).start();
+    }
+
+    private void handleStartMessage(String message) {
+        if (startListener == null) {
+            return;
+        }
+        String token = message.substring("START:".length()).trim();
+        boolean isLocalTurn = "YOU".equalsIgnoreCase(token);
+        startListener.onStartAssigned(isLocalTurn);
+    }
+
+    private void handleWaitingMessage() {
+        if (waitingListener != null) {
+            waitingListener.onWaitingForOpponent();
+        }
+    }
+
+    private void handleSessionCode(String message) {
+        if (sessionCodeListener == null) {
+            return;
+        }
+        String code = message.substring("SESSION:CODE:".length()).trim();
+        sessionCodeListener.onSessionCodeAssigned(code);
+    }
+
+    private void handleSessionError(String message) {
+        if (sessionErrorListener == null) {
+            return;
+        }
+        sessionErrorListener.onSessionError(message);
+    }
+
+    private void sendSessionRequest() {
+        if (writer == null) {
+            return;
+        }
+        try {
+            if (sessionCode == null || sessionCode.isBlank()) {
+                writer.write("SESSION:NEW");
+            } else {
+                writer.write("SESSION:JOIN:" + sessionCode.trim());
+            }
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            closeConnection();
+        }
+    }
+
+    public void closeConnection() {
+        System.out.println("connection closed");
+        try {
+            if (writer != null) {
+                writer.close();
+            }
+
+            if (reader != null) {
+                reader.close();
+            }
+
+            if (socket != null) {
+                socket.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/dama/network/ClientHandler.java">
+package com.dama.network;
+
+import java.io.*;
+import java.net.Socket;
+
+public class ClientHandler implements Runnable {
+    private final SessionManager sessionManager;
+
+    private Socket socket;
+    private BufferedReader reader;
+    private BufferedWriter writer;
+
+    public ClientHandler(Socket socket, SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+        try {
+            this.socket = socket;
+            this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println("client added to the list");
+        } catch (Exception e) {
+            closeConnection();
+        }
+    }
+
+    public void closeConnection() {
+        sessionManager.removeClient(this);
+        try {
+            if (writer != null) {
+                writer.close();
+            }
+
+            if (reader != null) {
+                reader.close();
+            }
+
+            if (socket != null) {
+                socket.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void run() {
+        if (!registerSession()) {
+            return;
+        }
+        while (socket != null && socket.isConnected()) {
+            try {
+                String receivedString = reader.readLine();
+                if (receivedString == null) {
+                    closeConnection();
+                    break;
+                }
+                if (receivedString.startsWith("SESSION:")) {
+                    continue;
+                }
+                Move receivedMove = Move.stringToMove(receivedString);
+                sessionManager.forwardMove(this, receivedMove);
+            } catch (IOException e) {
+                closeConnection();
+                break;
+            } catch (IllegalArgumentException e) {
+                // Ignore malformed messages and continue listening.
+            }
+        }
+    }
+
+    private boolean registerSession() {
+        try {
+            String firstLine = reader.readLine();
+            if (firstLine == null) {
+                closeConnection();
+                return false;
+            }
+            if (firstLine.startsWith("SESSION:JOIN:")) {
+                String code = firstLine.substring("SESSION:JOIN:".length()).trim();
+                return sessionManager.registerJoin(this, code);
+            }
+            if (firstLine.startsWith("SESSION:NEW")) {
+                sessionManager.registerNew(this);
+                return true;
+            }
+            sessionManager.registerNew(this);
+            Move initialMove = Move.stringToMove(firstLine);
+            sessionManager.forwardMove(this, initialMove);
+            return true;
+        } catch (IOException e) {
+            closeConnection();
+            return false;
+        } catch (IllegalArgumentException e) {
+            sessionManager.registerNew(this);
+            return true;
+        }
+    }
+
+    public void sendWaitingMessage() {
+        sendLine("WAITING");
+    }
+
+    public void sendStartMessage(boolean isLocalTurn) {
+        sendLine("START:" + (isLocalTurn ? "YOU" : "OPPONENT"));
+    }
+
+    public void sendSessionCode(String code) {
+        sendLine("SESSION:CODE:" + code);
+    }
+
+    public void sendLine(String line) {
+        try {
+            writer.write(line);
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            closeConnection();
+        }
+    }
+}
+</file>
+
+<file path="pom.xml">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.dama</groupId>
+    <artifactId>dama-game</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javafx.version>21</javafx.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.12.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.6</version>
+                <configuration>
+                    <mainClass>com.dama.Main</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+</file>
+
+<file path="src/main/java/com/dama/view/BoardView.java">
+package com.dama.view;
+
+import com.dama.controller.GameController;
+import com.dama.model.Board;
+import com.dama.model.Piece;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.InnerShadow;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class BoardView extends GridPane {
+
+    private static final int BOARD_SIZE = 8;
+    private static final int TILE_SIZE = 80;
+
+    // Colors — dark wood aesthetic
+    private static final Color DARK_TILE = Color.web("#5C3317");
+    private static final Color LIGHT_TILE = Color.web("#F0D9B5");
+    private static final Color HIGHLIGHT = Color.web("#50C87880"); // green, semi-transparent
+    private static final Color SELECTED_TILE = Color.web("#FFD70080"); // gold, semi-transparent
+    private static final Color RED_PIECE = Color.web("#C0392B");
+    private static final Color RED_PIECE_EDGE = Color.web("#922B21");
+    private static final Color BLACK_PIECE = Color.web("#1A1A2E");
+    private static final Color BLACK_PIECE_EDGE = Color.web("#0D0D1A");
+    private static final Color KING_COLOR = Color.web("#FFD700");
+
+    private final Board model;
+    private GameController controller;
+
+    private int selectedRow = -1;
+    private int selectedCol = -1;
+    private final Set<String> highlights = new HashSet<>();
+
+    // Grid of tile StackPanes for easy redraw
+    private final StackPane[][] tiles = new StackPane[BOARD_SIZE][BOARD_SIZE];
+
+    public BoardView(Board model) {
+        this.model = model;
+        setHgap(0);
+        setVgap(0);
+        buildBoard();
+    }
+
+    public void setController(GameController controller) {
+        this.controller = controller;
+    }
+
+    // ── Public API ────────────────────────────────────────────────
+
+    public void refresh() {
+        for (int row = 0; row < BOARD_SIZE; row++) {
+            for (int col = 0; col < BOARD_SIZE; col++) {
+                redrawTile(row, col);
+            }
+        }
+    }
+
+    public void setHighlights(int[][] squares) {
+        highlights.clear();
+        if (squares != null) {
+            for (int[] sq : squares) {
+                highlights.add(sq[0] + "," + sq[1]);
+            }
+        }
+        refresh();
+    }
+
+    public void clearHighlights() {
+        highlights.clear();
+        selectedRow = -1;
+        selectedCol = -1;
+        refresh();
+    }
+
+    // ── Private drawing ───────────────────────────────────────────
+
+    private void buildBoard() {
+        for (int row = 0; row < BOARD_SIZE; row++) {
+            for (int col = 0; col < BOARD_SIZE; col++) {
+                StackPane tile = new StackPane();
+                tile.setPrefSize(TILE_SIZE, TILE_SIZE);
+                tiles[row][col] = tile;
+
+                final int r = row, c = col;
+                tile.setOnMouseClicked(e -> onTileClicked(r, c));
+
+                redrawTile(row, col);
+                add(tile, col, row);
+            }
+        }
+    }
+
+    private void redrawTile(int row, int col) {
+        StackPane tile = tiles[row][col];
+        tile.getChildren().clear();
+
+        // ── Background square ──
+        Rectangle bg = new Rectangle(TILE_SIZE, TILE_SIZE);
+        boolean isDark = (row + col) % 2 != 0;
+        bg.setFill(isDark ? DARK_TILE : LIGHT_TILE);
+        tile.getChildren().add(bg);
+
+        // ── Highlight overlay ──
+        String key = row + "," + col;
+        if (highlights.contains(key)) {
+            Rectangle overlay = new Rectangle(TILE_SIZE, TILE_SIZE);
+            overlay.setFill(HIGHLIGHT);
+            tile.getChildren().add(overlay);
+        }
+
+        // ── Selected overlay ──
+        if (row == selectedRow && col == selectedCol) {
+            Rectangle overlay = new Rectangle(TILE_SIZE, TILE_SIZE);
+            overlay.setFill(SELECTED_TILE);
+            tile.getChildren().add(overlay);
+        }
+
+        // ── Piece ──
+        Piece piece = model.getPiece(row, col);
+        if (piece != null) {
+            tile.getChildren().add(buildPiece(piece));
+        }
+    }
+
+    private StackPane buildPiece(Piece piece) {
+        StackPane container = new StackPane();
+        container.setMouseTransparent(true); // clicks pass through to tile
+
+
+        double radius = (TILE_SIZE / 2.0) - 10;
+
+        // Shadow
+        Circle shadow = new Circle(radius);
+        shadow.setFill(Color.rgb(0, 0, 0, 0.35));
+        shadow.setTranslateX(3);
+        shadow.setTranslateY(4);
+
+        // Piece body
+        Circle body = new Circle(radius);
+        body.setFill(piece.getColor() == com.dama.model.Color.RED ? RED_PIECE : BLACK_PIECE);
+
+        // Inner highlight (3D feel)
+        InnerShadow inner = new InnerShadow();
+        inner.setColor(Color.rgb(255, 255, 255, 0.25));
+        inner.setRadius(10);
+        inner.setOffsetX(-3);
+        inner.setOffsetY(-3);
+        body.setEffect(inner);
+
+        // Edge ring
+        Circle edge = new Circle(radius);
+        edge.setFill(Color.TRANSPARENT);
+        edge.setStroke(piece.getColor() == com.dama.model.Color.RED ? RED_PIECE_EDGE : BLACK_PIECE_EDGE);
+        edge.setStrokeWidth(2.5);
+
+        container.getChildren().addAll(shadow, body, edge);
+
+        // King crown
+        if (piece.isKing()) {
+            Text crown = new Text("♛");
+            crown.setFont(Font.font("Serif", FontWeight.BOLD, 22));
+            crown.setFill(KING_COLOR);
+
+            DropShadow glow = new DropShadow();
+            glow.setColor(Color.web("#FFD700"));
+            glow.setRadius(6);
+            crown.setEffect(glow);
+
+            container.getChildren().add(crown);
+        }
+
+        return container;
+    }
+
+    private void onTileClicked(int row, int col) {
+        selectedRow = row;
+        selectedCol = col;
+        refresh();
+        if (controller != null) {
+            controller.onSquareSelected(row, col);
+        }
+    }
+}
+</file>
+
+<file path="src/main/java/com/dama/model/Position.java">
+package com.dama.model;
+
+public class Position {
+    int x;
+    int y;
+
+    public Position(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public static boolean isPlayable(int x, int y) {
+        return (x + y) % 2 == 0 && x >= 0 && x <= 7 && y >= 0 && y <= 7;
+
+    }
+
+    public static boolean isPlayable(Position position) {
+        return isPlayable(position.getX(), position.getY());
+    }
+
+    public boolean isPlayable() {
+        return isPlayable(this.x, this.y);
+    }
+
+    public Position getMirrorPosition() {
+        return new Position(7 - this.x, 7 - this.y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Position position = (Position) o;
+        return x == position.x && y == position.y;
+    }
+
+}
+</file>
+
+<file path="src/main/java/com/dama/view/GameWindow.java">
+package com.dama.view;
+
+import com.dama.controller.GameController;
+import com.dama.model.Board;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+public class GameWindow implements CheckersView, PropertyChangeListener {
+
+    private final Board model;
+    private GameController controller;
+
+    private final Stage stage;
+    private BoardView boardView;
+    private Text statusText;
+
+    public GameWindow(Stage stage, Board model) {
+        this.stage = stage;
+        this.model = model;
+        model.addPropertyChangeListener(this);
+        buildUI();
+    }
+
+    public void setController(GameController controller) {
+        this.controller = controller;
+        boardView.setController(controller);
+    }
+
+    // ── UI Construction ───────────────────────────────────────────
+
+    private void buildUI() {
+        // Board
+        boardView = new BoardView(model);
+
+        // Sidebar
+        VBox sidebar = buildSidebar();
+
+        // Root layout
+        HBox root = new HBox(0, boardView, sidebar);
+        root.setBackground(new Background(new BackgroundFill(
+                Color.web("#1A1A2E"), CornerRadii.EMPTY, Insets.EMPTY
+        )));
+
+        Scene scene = new Scene(root);
+        stage.setTitle("Dama — Checkers");
+        stage.setScene(scene);
+        stage.setResizable(false);
+    }
+
+    private VBox buildSidebar() {
+        VBox sidebar = new VBox(20);
+        sidebar.setPrefWidth(160);
+        sidebar.setAlignment(Pos.CENTER);
+        sidebar.setPadding(new Insets(30, 15, 30, 15));
+        sidebar.setBackground(new Background(new BackgroundFill(
+                Color.web("#16213E"), CornerRadii.EMPTY, Insets.EMPTY
+        )));
+
+        // Title
+        Text title = new Text("DAMA");
+        title.setFont(Font.font("Serif", FontWeight.BOLD, 28));
+        title.setFill(Color.web("#FFD700"));
+
+        // Status
+        statusText = new Text("Red's turn");
+        statusText.setFont(Font.font("SansSerif", FontWeight.NORMAL, 13));
+        statusText.setFill(Color.web("#CCCCCC"));
+        statusText.setWrappingWidth(130);
+
+        // Buttons
+        Button newGameBtn = createButton("New Game");
+        Button quitBtn = createButton("Quit");
+
+        newGameBtn.setOnAction(e -> {
+            if (controller != null) controller.onNewGame();
+        });
+        quitBtn.setOnAction(e -> {
+            if (controller != null) controller.onQuit();
+        });
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        sidebar.getChildren().addAll(title, statusText, spacer, newGameBtn, quitBtn);
+        return sidebar;
+    }
+
+    private Button createButton(String label) {
+        Button btn = new Button(label);
+        btn.setPrefWidth(130);
+        btn.setPrefHeight(40);
+        btn.setFont(Font.font("SansSerif", FontWeight.BOLD, 13));
+        btn.setStyle(
+                "-fx-background-color: #0F3460;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;"
+        );
+        btn.setOnMouseEntered(e -> btn.setStyle(
+                "-fx-background-color: #E94560;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;"
+        ));
+        btn.setOnMouseExited(e -> btn.setStyle(
+                "-fx-background-color: #0F3460;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;"
+        ));
+        return btn;
+    }
+
+    // ── CheckersView ──────────────────────────────────────────────
+
+    @Override
+    public void refreshBoard() {
+        boardView.refresh();
+//        statusText.setText(model.getCurrentPlayer() + "'s turn");
+    }
+
+    @Override
+    public void highlightSquares(int[][] squares) {
+        boardView.setHighlights(squares);
+    }
+
+    @Override
+    public void clearHighlights() {
+        boardView.clearHighlights();
+    }
+
+    @Override
+    public void setStatusMessage(String message) {
+        statusText.setText(message);
+    }
+
+    @Override
+    public void showGameOverMessage(String winner) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Over");
+        alert.setHeaderText(null);
+        alert.setContentText(winner + " wins! Congratulations!");
+        alert.showAndWait();
+    }
+
+    @Override
+    public void show() {
+        stage.show();
+    }
+
+    // ── PropertyChangeListener (Model → View) ─────────────────────
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        Platform.runLater(() -> {
+            if ("boardState".equals(evt.getPropertyName())) {
+                refreshBoard();
+            }
+            if ("gameOver".equals(evt.getPropertyName())) {
+//                #TODO: showGameOverMessage(model.getWinner());
+            }
+        });
+    }
+}
+</file>
+
+<file path="src/main/java/com/dama/model/Board.java">
+package com.dama.model;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Board {
+    private final Piece[][] pieces = new Piece[8][8];
+    private Color currentPlayer;
+    private GameState state;
+
+    private final PropertyChangeSupport support;
+
+    public Board() {
+        this.state = GameState.IN_PROGRESS;
+        //always red starts 😊
+        this.currentPlayer = Color.RED;
+
+        support = new PropertyChangeSupport(this);
+
+        initBoard();
+    }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public void setBlackWinner() {
+        this.state = GameState.BLACK_WINS;
+    }
+
+    public void setRedWinner() {
+        this.state = GameState.RED_WINS;
+    }
+
+    public void setDraw() {
+        this.state = GameState.DRAW;
+    }
+
+    private void initBoard() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (Position.isPlayable(i, j))
+                    this.pieces[i][j] = new Piece(Color.BLACK, new Position(i, j));
+            }
+        }
+
+        for (int i = 5; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if ((Position.isPlayable(i, j)))
+                    this.pieces[i][j] = new Piece(Color.RED, new Position(i, j));
+            }
+        }
+    }
+
+    public Piece getPiece(int x, int y) {
+        return this.pieces[x][y];
+    }
+
+    public Piece getPiece(Position position) {
+        return getPiece(position.getX(), position.getY());
+    }
+
+    public Color getCurrentPlayer() {
+        return this.currentPlayer;
+    }
+
+    public void switchTurn() {
+        if (this.currentPlayer == Color.BLACK) {
+            this.currentPlayer = Color.RED;
+        } else {
+            this.currentPlayer = Color.BLACK;
+        }
+    }
+
+    public void reset() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                pieces[i][j] = null;
+            }
+        }
+        this.state = GameState.IN_PROGRESS;
+        this.currentPlayer = Color.RED;
+        initBoard();
+        this.support.firePropertyChange("boardState", null, this.pieces);
+    }
+
+    /**
+     * Returns true when the target square is playable and not occupied.
+     */
+    private boolean isLegalLandingSquare(Piece piece, Position position) {
+        return position.isPlayable() && getPiece(position) == null;
+    }
+
+    private List<Position> getCaptureMoves(Position position) {
+        Piece piece = getPiece(position);
+        if (piece == null) return new ArrayList<>();
+
+        List<Position> captures = new ArrayList<>();
+        Position[] candidates;
+
+        int direction = piece.getColor() == Color.BLACK ? 1 : -1;
+        if (!piece.isKing()) {
+            candidates = new Position[]{
+                    new Position(position.getX() + direction, position.getY() + 1),
+                    new Position(position.getX() + direction, position.getY() - 1)
+            };
+        } else {
+            candidates = new Position[]{
+                    new Position(position.getX() + direction, position.getY() + 1),
+                    new Position(position.getX() + direction, position.getY() - 1),
+                    new Position(position.getX() - direction, position.getY() + 1),
+                    new Position(position.getX() - direction, position.getY() - 1)
+            };
+        }
+
+        for (Position candidate : candidates) {
+            if (!candidate.isPlayable()) continue;
+
+            Piece jumped = getPiece(candidate);
+            if (jumped == null || jumped.getColor() == piece.getColor()) continue;
+
+            int jumpX = position.getX() + (candidate.getX() - position.getX()) * 2;
+            int jumpY = position.getY() + (candidate.getY() - position.getY()) * 2;
+            Position landing = new Position(jumpX, jumpY);
+            if (isLegalLandingSquare(piece, landing)) captures.add(landing);
+        }
+
+        return captures;
+    }
+
+    public boolean hasCaptureMove(Color color) {
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                Piece piece = pieces[x][y];
+                if (piece == null || piece.getColor() != color) continue;
+                if (!getCaptureMoves(new Position(x, y)).isEmpty()) return true;
+            }
+        }
+        return false;
+    }
+
+    public void movePiece(Position initialPosition, Position newPosition) {
+        if (getPossibleMovements(initialPosition).contains(newPosition)) {
+            Piece moving = getPiece(initialPosition);
+            pieces[newPosition.getX()][newPosition.getY()] = moving;
+            pieces[initialPosition.getX()][initialPosition.getY()] = null;
+
+            //check if the move is a capture move
+            int deltaX = newPosition.getX() - initialPosition.getX();
+            int deltaY = newPosition.getY() - initialPosition.getY();
+            if (Math.abs(deltaX) == 2 && Math.abs(deltaY) == 2) {
+                int jumpedX = initialPosition.getX() + (deltaX / 2);
+                int jumpedY = initialPosition.getY() + (deltaY / 2);
+                pieces[jumpedX][jumpedY] = null;
+            }
+
+            if (moving != null) {
+                moving.setPosition(newPosition.getX(), newPosition.getY());
+            }
+
+            this.support.firePropertyChange("boardState", null, this.pieces);
+
+            switchTurn();
+        }
+    }
+
+    public List<Position> getPossibleMovements(Position position) {
+        Piece piece = getPiece(position);
+
+        if (!position.isPlayable() || piece == null) return new ArrayList<>();
+
+        List<Position> captures = getCaptureMoves(position);
+        if (!captures.isEmpty()) return captures;
+
+        if (hasCaptureMove(piece.getColor())) return new ArrayList<>();
+
+        List<Position> movements = new ArrayList<>();
+        Position[] candidates;
+
+        int direction = piece.getColor() == Color.BLACK ? 1 : -1;
+        if (!piece.isKing()) {
+            candidates = new Position[]{
+                    new Position(position.getX() + direction, position.getY() + 1),
+                    new Position(position.getX() + direction, position.getY() - 1)
+            };
+        } else {
+            candidates = new Position[]{
+                    new Position(position.getX() + direction, position.getY() + 1),
+                    new Position(position.getX() + direction, position.getY() - 1),
+                    new Position(position.getX() - direction, position.getY() + 1),
+                    new Position(position.getX() - direction, position.getY() - 1)
+            };
+        }
+
+        for (Position candidate : candidates) {
+            if (isLegalLandingSquare(piece, candidate)) movements.add(candidate);
+        }
+
+        return movements;
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
+    }
+
+
+}
+</file>
+
+<file path="src/main/java/com/dama/Main.java">
+package com.dama;
+
+import com.dama.controller.GameController;
+import com.dama.controller.GameType;
+import com.dama.model.Board;
+import com.dama.view.GameWindow;
+import javafx.application.Application;
+import javafx.stage.Stage;
+
+public class Main extends Application {
+
+    @Override
+    public void start(Stage primaryStage) {
+        Board board = new Board();
+        GameWindow window = new GameWindow(primaryStage, board);
+        GameController controller = new GameController(
+                board,
+                window,
+                GameType.LOCAL_TWO_PAYERS
+        );
+        controller.setLocalClient(new com.dama.network.Client());
+        window.setController(controller);
+        window.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+</file>
+
+</files>
