@@ -6,6 +6,7 @@ import com.dama.model.Board;
 import com.dama.network.Client;
 import com.dama.view.GameWindow;
 import com.dama.view.MenuView;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -13,9 +14,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -44,6 +48,9 @@ public class Main extends Application {
             }
 
             @Override
+            public void onPvP() { startPvP(); }  
+
+            @Override
             public void onMultiplayerHost() {
                 startMultiplayerHost();
             }
@@ -62,6 +69,17 @@ public class Main extends Application {
         Board board = new Board();
         GameWindow window = new GameWindow(primaryStage, board);
         GameController controller = new GameController(board, window, GameType.LOCAL_VS_AI);
+        window.setController(controller);
+        addBackToMenuButton(window, controller);
+        window.show();
+    }
+
+    // ── Single Player (vs Local) ─────────────────────────────────────
+
+    private void startPvP() {
+        Board board = new Board();
+        GameWindow window = new GameWindow(primaryStage, board);
+        GameController controller = new GameController(board, window, GameType.LOCAL_TWO_PAYERS);
         window.setController(controller);
         addBackToMenuButton(window, controller);
         window.show();
