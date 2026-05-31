@@ -1,6 +1,7 @@
 package com.dama.network;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -39,7 +40,8 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(1234);
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "1234"));
+        ServerSocket serverSocket = new ServerSocket(port, 50, InetAddress.getByName("0.0.0.0"));
         Server server = new Server(serverSocket, new SessionManager());
         server.startServer();
     }
