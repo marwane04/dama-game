@@ -200,11 +200,8 @@ public class Main extends Application {
         // Receive the assigned session code from the server
         client.setSessionCodeListener(code -> Platform.runLater(() -> codeText.setText(code)));
 
-        // Once both players are connected, the server sends START — dismiss overlay and play
-        client.setStartListener(isLocalTurn -> Platform.runLater(() -> {
+        controller.setOnlineStartListener(isLocalTurn -> Platform.runLater(() -> {
             overlayStage.close();
-            controller.setLocalTurn(isLocalTurn);
-            // Wire client AFTER start so listeners are set properly
             addBackToMenuButton(window, controller);
             window.show();
         }));
