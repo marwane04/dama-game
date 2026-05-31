@@ -16,7 +16,9 @@ public class Client {
     public Client(String sessionCode) {
         this.sessionCode = sessionCode;
         try {
-            this.socket = new Socket("localhost", 1234);
+            String host = System.getenv().getOrDefault("SERVER_HOST", "localhost");
+            int port = Integer.parseInt(System.getenv().getOrDefault("SERVER_PORT", "1234"));
+            this.socket = new Socket(host, port);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             sendSessionRequest();
