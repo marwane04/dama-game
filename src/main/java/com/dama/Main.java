@@ -6,6 +6,7 @@ import com.dama.model.Board;
 import com.dama.network.Client;
 import com.dama.view.GameWindow;
 import com.dama.view.MenuView;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -70,6 +71,7 @@ public class Main extends Application {
         Board board = new Board();
         GameWindow window = new GameWindow(primaryStage, board);
         GameController controller = new GameController(board, window, GameType.ONLINE);
+        window.setController(controller);
 
         Client client = new Client();
 
@@ -94,6 +96,7 @@ public class Main extends Application {
         Board board = new Board();
         GameWindow window = new GameWindow(primaryStage, board);
         GameController controller = new GameController(board, window, GameType.ONLINE);
+        window.setController(controller);
 
         Client client = new Client(code);
 

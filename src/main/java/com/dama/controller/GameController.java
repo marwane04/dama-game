@@ -27,6 +27,8 @@ public class GameController {
     private boolean onlineReady = true;
     private boolean aiThinking = false;
 
+    private Client.StartListener onlineStartListener;
+
     private Position selectedPosition;
     private List<Position> selectedMoves;
 
@@ -46,6 +48,9 @@ public class GameController {
             this.localClient.setStartListener(isLocalTurn -> {
                 onlineReady = true;
                 setLocalTurn(isLocalTurn);
+                if (onlineStartListener != null) {
+                    onlineStartListener.onStartAssigned(isLocalTurn);
+                }
             });
             this.localClient.setWaitingListener(() -> {
                 onlineReady = false;
@@ -245,5 +250,9 @@ public class GameController {
             updateStatusForCurrentPlayer();
             checkGameOver();
         });
+    }
+
+    public void setOnlineStartListener(Client.StartListener onlineStartListener) {
+        this.onlineStartListener = onlineStartListener;
     }
 }
