@@ -5,10 +5,13 @@ public interface CheckersView {
     // Refresh the entire board display
     void refreshBoard();
 
-    // Highlight valid move squares for a selected piece
+    // Highlight valid move target squares for a selected piece
     void highlightSquares(int[][] squares);
 
-    // Clear all highlights
+    // Highlight the currently selected piece's square
+    void setSelectedPiece(int row, int col);
+
+    // Clear all highlights and selection
     void clearHighlights();
 
     // Update the status message (e.g. "Red's turn")

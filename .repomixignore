@@ -1,0 +1,33 @@
+# --- Build & Output Directories ---
+**/target/
+**/build/
+**/.gradle/
+
+# --- Compiled Java Files & Binaries ---
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+**/*.zip
+**/*.tar.gz
+
+# --- IDE & Editor Metadata ---
+# IntelliJ IDEA
+**/.idea/
+**/*.iml
+**/*.ipr
+**/*.iws
+
+# Eclipse
+**/.settings/
+**/.project
+**/.classpath
+
+# VS Code
+**/.vscode/
+
+# --- Standard System Logs & Temporary Files ---
+**/*.log
+**/tmp/
+**/.DS_Store
+Thumbs.db
