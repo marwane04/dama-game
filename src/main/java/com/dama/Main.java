@@ -91,6 +91,7 @@ public class Main extends Application {
         Board board = new Board();
         GameWindow window = new GameWindow(primaryStage, board);
         GameController controller = new GameController(board, window, GameType.ONLINE);
+        window.setController(controller);
 
         // Show a waiting overlay with the session code
         showSessionCodeOverlay(window, controller, board, null);
@@ -102,6 +103,7 @@ public class Main extends Application {
         Board board = new Board();
         GameWindow window = new GameWindow(primaryStage, board);
         GameController controller = new GameController(board, window, GameType.ONLINE);
+        window.setController(controller);
 
         Client client = new Client(code);
 
