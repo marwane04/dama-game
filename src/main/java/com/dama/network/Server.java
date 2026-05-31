@@ -27,6 +27,11 @@ public class Server {
         } catch (IOException e) {
             closeConnection();
         }
+        catch (Exception e) {
+            System.err.println("Error details:");
+            e.printStackTrace();
+            closeConnection();
+        }
     }
 
     private void closeConnection() {
