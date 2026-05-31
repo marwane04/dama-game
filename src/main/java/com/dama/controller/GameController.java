@@ -1,13 +1,18 @@
 package com.dama.controller;
 
-import com.dama.model.*;
+import java.util.List;
+
+import com.dama.model.Board;
+import com.dama.model.Color;
+import com.dama.model.GameState;
+import com.dama.model.Piece;
+import com.dama.model.Position;
 import com.dama.network.Client;
 import com.dama.network.Move;
 import com.dama.view.CheckersView;
+
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-
-import java.util.List;
 
 public class GameController {
 
@@ -183,8 +188,9 @@ public class GameController {
     private void selectPiece(Position position) {
         selectedPosition = position;
         selectedMoves = model.getPossibleMovements(position);
-        view.highlightSquares(toSquaresArray(selectedMoves));
+        // setSelectedPiece FIRST so BoardView knows the origin when classifying dots
         view.setSelectedPiece(position.getX(), position.getY());
+        view.highlightSquares(toSquaresArray(selectedMoves));
     }
 
     private void clearSelection() {
