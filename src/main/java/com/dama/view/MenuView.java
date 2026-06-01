@@ -83,6 +83,7 @@ public class MenuView {
 
         VBox card = buildHostWaitingCard(client, codeRef, onCancel);
         animateCardIn(card);
+        client.listenForMoves();
     }
 
     // ── Called from Main when joining — shows connecting card inline
