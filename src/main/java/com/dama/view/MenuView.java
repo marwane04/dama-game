@@ -1,9 +1,7 @@
 package com.dama.view;
 
-import com.dama.network.Client;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,7 +9,13 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -19,8 +23,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.util.function.Consumer;
 
 public class MenuView {
 
@@ -34,6 +36,8 @@ public class MenuView {
 
     private final Stage stage;
     private MenuListener menuListener;
+
+    // Track which card is showing
     private StackPane root;
 
     public MenuView(Stage stage) {
@@ -44,12 +48,38 @@ public class MenuView {
         this.menuListener = listener;
     }
 
-    // ── Main show ─────────────────────────────────────────────────
+    // ── Main entry point ──────────────────────────────────────────
 
     public void show() {
-        root = buildRoot();
+        root = new StackPane();
+        root.setPrefSize(820, 640);
+
+        // Background board pattern
+        Canvas bg = new Canvas(820, 640);
+        drawBackground(bg.getGraphicsContext2D());
+        root.getChildren().add(bg);
+
+        // Dark overlay
+        Pane overlay = new Pane();
+        overlay.setPrefSize(820, 640);
+        overlay.setBackground(new Background(new BackgroundFill(
+            Color.rgb(10, 10, 20, 0.80), CornerRadii.EMPTY, Insets.EMPTY
+        )));
+        root.getChildren().add(overlay);
+
+        // Show main menu card
         showMainCard();
-        applyIcon();
+
+        // Icon
+        try {
+            javafx.scene.image.Image icon = new javafx.scene.image.Image(
+                getClass().getResourceAsStream("/damalcon.png")
+            );
+            stage.getIcons().add(icon);
+        } catch (Exception e) {
+            System.out.println("Icon not found, skipping.");
+        }
+
         Scene scene = new Scene(root);
         stage.setTitle("Dama — Checkers");
         stage.setScene(scene);
@@ -57,79 +87,44 @@ public class MenuView {
         stage.show();
     }
 
-    // ── Called from Main when hosting — shows waiting card inline ─
-
-    public void showHostWaiting(Client client, Runnable onGameStart, Runnable onCancel) {
-        root = buildRoot();
-        applyIcon();
-        Scene scene = new Scene(root);
-        stage.setTitle("Dama — Checkers");
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
-
-        // Register code listener BEFORE showing card
-        final Text[] codeRef = { null };
-
-        client.setSessionCodeListener(code ->
-            Platform.runLater(() -> {
-                if (codeRef[0] != null) codeRef[0].setText(code);
-            })
-        );
-
-        client.setStartListener(isLocalTurn ->
-            Platform.runLater(onGameStart)
-        );
-
-        VBox card = buildHostWaitingCard(client, codeRef, onCancel);
-        animateCardIn(card);
-        client.listenForMoves();
-    }
-
-    // ── Called from Main when joining — shows connecting card inline
-
-    public void showJoinWaiting(String code, Client client,
-                                 Consumer<Boolean> onGameStart, Runnable onCancel) {
-        root = buildRoot();
-        applyIcon();
-        Scene scene = new Scene(root);
-        stage.setTitle("Dama — Checkers");
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
-
-        client.setStartListener(isLocalTurn ->
-            Platform.runLater(() -> onGameStart.accept(isLocalTurn))
-        );
-
-        VBox card = buildJoinWaitingCard(code, client, onCancel);
-        animateCardIn(card);
-        client.listenForMoves();
-    }
-
-    // ── Screen 1: Main Menu card ──────────────────────────────────
+    // ── Screen 1: Main Menu ───────────────────────────────────────
 
     private void showMainCard() {
         VBox card = buildCardShell();
 
-        HBox pieces  = buildDecorativePieces();
-        Text title   = buildTitle("DAMA");
-        Text subtitle= buildSubtitle("Jeu de Dames");
+        // Header
+        HBox pieces = buildDecorativePieces();
+        Text title = buildTitle("DAMA");
+        Text subtitle = buildSubtitle("Jeu de Dames");
         Pane divider = buildDivider();
 
-        Button pvAiBtn  = createMenuButton("⚔   Player vs AI",     "#C0392B", "#922B21");
-        Button pvpBtn   = createMenuButton("👥   Player vs Player", "#1A6B3C", "#145530");
-        Button multiBtn = createMenuButton("🌐   Multiplayer",      "#0F3460", "#0a2040");
+        // Mode buttons
+        Button pvAiBtn  = createMenuButton("⚔   Player vs AI",      "#C0392B", "#922B21");
+        Button pvpBtn   = createMenuButton("👥   Player vs Player",  "#1A6B3C", "#145530");
+        Button multiBtn = createMenuButton("🌐   Multiplayer",       "#0F3460", "#0a2040");
 
-        pvAiBtn.setOnAction(e  -> { if (menuListener != null) menuListener.onSinglePlayer(); });
-        pvpBtn.setOnAction(e   -> { if (menuListener != null) menuListener.onPvP(); });
+        pvAiBtn.setOnAction(e -> {
+            if (menuListener != null) menuListener.onSinglePlayer();
+        });
+
+        pvpBtn.setOnAction(e -> {
+            // Directly launch local two-player — no sub-menu needed
+            if (menuListener != null) menuListener.onMultiplayerHost();
+            // Note: we use a dedicated PvP callback below
+        });
+
         multiBtn.setOnAction(e -> animateToCard(buildMultiplayerCard()));
+
+        // Override PvP to use its own path
+        pvpBtn.setOnAction(e -> {
+            if (menuListener != null) menuListener.onPvP();
+        });
 
         card.getChildren().addAll(pieces, title, subtitle, divider, pvAiBtn, pvpBtn, multiBtn);
         animateCardIn(card);
     }
 
-    // ── Screen 2: Multiplayer sub-menu card ───────────────────────
+    // ── Screen 2: Multiplayer Sub-menu ────────────────────────────
 
     private VBox buildMultiplayerCard() {
         VBox card = buildCardShell();
@@ -138,99 +133,71 @@ public class MenuView {
         Text subtitle = buildSubtitle("Online Game");
         Pane divider  = buildDivider();
 
+        // Host button
         Button hostBtn = createMenuButton("🏠   Host a Game", "#0F3460", "#0a2040");
-        hostBtn.setOnAction(e -> { if (menuListener != null) menuListener.onMultiplayerHost(); });
+        hostBtn.setOnAction(e -> {
+            if (menuListener != null) menuListener.onMultiplayerHost();
+        });
 
+        // Join section
         Text joinLabel = new Text("— or join with a code —");
         joinLabel.setFont(Font.font("SansSerif", 12));
         joinLabel.setFill(Color.web("#556677"));
 
         HBox joinRow = buildJoinRow();
 
+        // Back button
         Button backBtn = createSecondaryButton("← Back");
-        backBtn.setOnAction(e -> { clearCards(); showMainCard(); });
+        backBtn.setOnAction(e -> {
+            clearCards();
+            showMainCard();
+        });
 
         card.getChildren().addAll(title, subtitle, divider, hostBtn, joinLabel, joinRow, backBtn);
         return card;
     }
 
-    // ── Screen 3: Host waiting card (inline, same window) ─────────
+    // ── Animation helpers ─────────────────────────────────────────
 
-    private VBox buildHostWaitingCard(Client client, Text[] codeRef, Runnable onCancel) {
-        VBox card = buildCardShell();
+    private void animateToCard(VBox newCard) {
+        clearCards();
+        animateCardIn(newCard);
+    }
 
-        Text title = buildTitle("DAMA");
+    private void clearCards() {
+        // Remove all VBox cards (keep bg + overlay which are Canvas and Pane)
+        root.getChildren().removeIf(n -> n instanceof VBox);
+    }
 
-        Text instruction = new Text("Share this code with your friend:");
-        instruction.setFont(Font.font("SansSerif", FontWeight.NORMAL, 13));
-        instruction.setFill(Color.web("#AABBCC"));
+    private void animateCardIn(VBox card) {
+        root.getChildren().add(card);
+        StackPane.setAlignment(card, Pos.CENTER);
 
-        // Code display — will be filled when server responds
-        Text codeText = new Text("…");
-        codeText.setFont(Font.font("Courier New", FontWeight.BOLD, 46));
-        codeText.setFill(Color.web("#FFD700"));
-        codeText.setStyle(
-            "-fx-effect: dropshadow(gaussian, #FFD70088, 16, 0.4, 0, 0);"
-        );
-        codeRef[0] = codeText; // so the listener can update it
+        card.setOpacity(0);
+        card.setTranslateY(20);
 
-        Text waiting = new Text("⏳  Waiting for opponent to join…");
-        waiting.setFont(Font.font("SansSerif", FontWeight.NORMAL, 13));
-        waiting.setFill(Color.web("#8899AA"));
+        FadeTransition fade = new FadeTransition(Duration.millis(400), card);
+        fade.setFromValue(0); fade.setToValue(1); fade.play();
 
-        // Copy button
-        Button copyBtn = createMenuButton("📋  Copy Code", "#1A3A5C", "#0F2A4A");
-        copyBtn.setOnAction(e -> {
-            javafx.scene.input.Clipboard cb = javafx.scene.input.Clipboard.getSystemClipboard();
-            javafx.scene.input.ClipboardContent cc = new javafx.scene.input.ClipboardContent();
-            cc.putString(codeText.getText());
-            cb.setContent(cc);
-            copyBtn.setText("✓  Copied!");
-        });
+        TranslateTransition slide = new TranslateTransition(Duration.millis(400), card);
+        slide.setFromY(20); slide.setToY(0); slide.play();
+    }
 
-        Button cancelBtn = createSecondaryButton("← Cancel");
-        cancelBtn.setOnAction(e -> {
-            client.closeConnection();
-            onCancel.run();
-        });
+    // ── Card shell ────────────────────────────────────────────────
 
-        card.getChildren().addAll(title, instruction, codeText, waiting, copyBtn, cancelBtn);
+    private VBox buildCardShell() {
+        VBox card = new VBox(18);
+        card.setAlignment(Pos.CENTER);
+        card.setMaxWidth(360);
+        card.setPadding(new Insets(45, 40, 45, 40));
+        card.setBackground(new Background(new BackgroundFill(
+            Color.rgb(22, 28, 48, 0.93), new CornerRadii(16), Insets.EMPTY
+        )));
+        card.setStyle("-fx-border-color: #3a4060; -fx-border-width: 1; -fx-border-radius: 16;");
         return card;
     }
 
-    // ── Screen 4: Join waiting card (inline, same window) ─────────
-
-    private VBox buildJoinWaitingCard(String code, Client client, Runnable onCancel) {
-        VBox card = buildCardShell();
-
-        Text title = buildTitle("DAMA");
-
-        Text instruction = new Text("Connecting with code:");
-        instruction.setFont(Font.font("SansSerif", FontWeight.NORMAL, 13));
-        instruction.setFill(Color.web("#AABBCC"));
-
-        Text codeDisplay = new Text(code);
-        codeDisplay.setFont(Font.font("Courier New", FontWeight.BOLD, 46));
-        codeDisplay.setFill(Color.web("#FFD700"));
-        codeDisplay.setStyle(
-            "-fx-effect: dropshadow(gaussian, #FFD70088, 16, 0.4, 0, 0);"
-        );
-
-        Text waiting = new Text("⏳  Waiting for host to start…");
-        waiting.setFont(Font.font("SansSerif", FontWeight.NORMAL, 13));
-        waiting.setFill(Color.web("#8899AA"));
-
-        Button cancelBtn = createSecondaryButton("← Cancel");
-        cancelBtn.setOnAction(e -> {
-            client.closeConnection();
-            onCancel.run();
-        });
-
-        card.getChildren().addAll(title, instruction, codeDisplay, waiting, cancelBtn);
-        return card;
-    }
-
-    // ── Join input row ────────────────────────────────────────────
+    // ── Join row ──────────────────────────────────────────────────
 
     private HBox buildJoinRow() {
         TextField codeField = new TextField();
@@ -259,8 +226,9 @@ public class MenuView {
 
         Runnable doJoin = () -> {
             String code = codeField.getText().trim();
-            if (!code.isEmpty() && menuListener != null)
+            if (!code.isEmpty() && menuListener != null) {
                 menuListener.onMultiplayerJoin(code);
+            }
         };
         joinBtn.setOnAction(e -> doJoin.run());
         codeField.setOnAction(e -> doJoin.run());
@@ -270,64 +238,7 @@ public class MenuView {
         return row;
     }
 
-    // ── Animation ─────────────────────────────────────────────────
-
-    private void animateToCard(VBox newCard) {
-        clearCards();
-        animateCardIn(newCard);
-    }
-
-    private void clearCards() {
-        root.getChildren().removeIf(n -> n instanceof VBox);
-    }
-
-    private void animateCardIn(VBox card) {
-        root.getChildren().add(card);
-        StackPane.setAlignment(card, Pos.CENTER);
-        card.setOpacity(0);
-        card.setTranslateY(20);
-
-        FadeTransition fade = new FadeTransition(Duration.millis(400), card);
-        fade.setFromValue(0); fade.setToValue(1); fade.play();
-
-        TranslateTransition slide = new TranslateTransition(Duration.millis(400), card);
-        slide.setFromY(20); slide.setToY(0); slide.play();
-    }
-
-    // ── Reusable builders ─────────────────────────────────────────
-
-    private StackPane buildRoot() {
-        StackPane r = new StackPane();
-        r.setPrefSize(820, 640);
-
-        Canvas bg = new Canvas(820, 640);
-        drawBackground(bg.getGraphicsContext2D());
-        r.getChildren().add(bg);
-
-        Pane overlay = new Pane();
-        overlay.setPrefSize(820, 640);
-        overlay.setBackground(new Background(new BackgroundFill(
-            Color.rgb(10, 10, 20, 0.80), CornerRadii.EMPTY, Insets.EMPTY
-        )));
-        r.getChildren().add(overlay);
-        return r;
-    }
-
-    private VBox buildCardShell() {
-        VBox card = new VBox(18);
-        card.setAlignment(Pos.CENTER);
-        card.setMaxWidth(360);
-        card.setPadding(new Insets(45, 40, 45, 40));
-        card.setBackground(new Background(new BackgroundFill(
-            Color.rgb(22, 28, 48, 0.93), new CornerRadii(16), Insets.EMPTY
-        )));
-        card.setStyle(
-            "-fx-border-color: #3a4060;" +
-            "-fx-border-width: 1;" +
-            "-fx-border-radius: 16;"
-        );
-        return card;
-    }
+    // ── Reusable UI pieces ────────────────────────────────────────
 
     private Text buildTitle(String text) {
         Text t = new Text(text);
@@ -402,17 +313,5 @@ public class MenuView {
                 gc.setFill((r + c) % 2 == 0 ? light : dark);
                 gc.fillRect(c * ts, r * ts, ts, ts);
             }
-    }
-
-    private void applyIcon() {
-        try {
-            javafx.scene.image.Image icon = new javafx.scene.image.Image(
-                getClass().getResourceAsStream("/damaIcon.png")
-            );
-            if (!stage.getIcons().contains(icon))
-                stage.getIcons().add(icon);
-        } catch (Exception e) {
-            System.out.println("Icon not found, skipping.");
-        }
     }
 }
