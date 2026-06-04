@@ -28,6 +28,8 @@ public class SessionOverlayView {
         stage.initOwner(owner);
         stage.setTitle("Waiting for Opponent");
         stage.setResizable(false);
+        stage.setAlwaysOnTop(true);
+        stage.setOnShown(e -> stage.centerOnScreen());
         stage.setOnCloseRequest(e -> {
             if (onClose != null) {
                 onClose.run();
