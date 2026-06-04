@@ -104,6 +104,7 @@ public class MenuController {
         overlay.show();
 
         client.setSessionCodeListener(code -> Platform.runLater(() -> overlay.setCode(code)));
+
         controller.setOnlineStartListener(isLocalTurn -> Platform.runLater(() -> {
             overlay.close();
             addBackToMenuButton(window);
