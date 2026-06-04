@@ -32,6 +32,7 @@ public class MenuView {
         void onPvP();
         void onMultiplayerHost();
         void onMultiplayerJoin(String code);
+        void onGameHistory();
     }
 
     private final Stage stage;
@@ -39,6 +40,7 @@ public class MenuView {
 
     // Track which card is showing
     private StackPane root;
+    private Button historyButton;
 
     public MenuView(Stage stage) {
         this.stage = stage;
@@ -122,6 +124,8 @@ public class MenuView {
 
         card.getChildren().addAll(pieces, title, subtitle, divider, pvAiBtn, pvpBtn, multiBtn);
         animateCardIn(card);
+
+        showHistoryButton();
     }
 
     // ── Screen 2: Multiplayer Sub-menu ────────────────────────────
@@ -167,6 +171,7 @@ public class MenuView {
     private void clearCards() {
         // Remove all VBox cards (keep bg + overlay which are Canvas and Pane)
         root.getChildren().removeIf(n -> n instanceof VBox);
+        hideHistoryButton();
     }
 
     private void animateCardIn(VBox card) {
@@ -181,6 +186,28 @@ public class MenuView {
 
         TranslateTransition slide = new TranslateTransition(Duration.millis(400), card);
         slide.setFromY(20); slide.setToY(0); slide.play();
+    }
+
+    private void showHistoryButton() {
+        if (historyButton == null) {
+            historyButton = createSecondaryButton("History");
+            historyButton.setPrefSize(120, 32);
+            historyButton.setFont(Font.font("SansSerif", FontWeight.NORMAL, 12));
+            historyButton.setOnAction(e -> {
+                if (menuListener != null) menuListener.onGameHistory();
+            });
+        }
+        if (!root.getChildren().contains(historyButton)) {
+            root.getChildren().add(historyButton);
+            StackPane.setAlignment(historyButton, Pos.BOTTOM_RIGHT);
+            StackPane.setMargin(historyButton, new Insets(0, 16, 16, 0));
+        }
+    }
+
+    private void hideHistoryButton() {
+        if (historyButton != null) {
+            root.getChildren().remove(historyButton);
+        }
     }
 
     // ── Card shell ────────────────────────────────────────────────

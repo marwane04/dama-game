@@ -40,6 +40,11 @@ public class MenuController {
             public void onMultiplayerJoin(String code) {
                 startMultiplayerJoin(code);
             }
+
+            @Override
+            public void onGameHistory() {
+                showGameHistory();
+            }
         });
         menu.show();
     }
@@ -118,5 +123,9 @@ public class MenuController {
 
     private void addBackToMenuButton(GameWindow window) {
         window.setOnMenuRequested(this::showMenu);
+    }
+
+    private void showGameHistory() {
+        //#TODO
     }
 }
