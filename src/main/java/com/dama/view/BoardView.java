@@ -26,8 +26,8 @@ public class BoardView extends GridPane {
     private static final Color DARK_TILE         = Color.web("#5C3317");
     private static final Color LIGHT_TILE        = Color.web("#F0D9B5");
     private static final Color SELECTED_TILE     = Color.web("#FFD700BB");
-    private static final Color MOVE_DOT_COLOR    = Color.web("#27AE60CC");
-    private static final Color CAPTURE_DOT_COLOR = Color.web("#E67E22DD");
+    private static final Color MOVE_DOT_COLOR    = Color.web("#50C878CC");
+    private static final Color CAPTURE_DOT_COLOR = Color.web("#E94560CC");
     private static final Color RED_PIECE         = Color.web("#C0392B");
     private static final Color RED_PIECE_EDGE    = Color.web("#922B21");
     private static final Color BLACK_PIECE       = Color.web("#1A1A2E");
@@ -39,10 +39,7 @@ public class BoardView extends GridPane {
 
     private int selectedRow = -1;
     private int selectedCol = -1;
-
-    // Separate sets — populated correctly in setHighlights
-    private final Set<String> moveDots    = new HashSet<>();
-    private final Set<String> captureDots = new HashSet<>();
+    private final Set<String> highlights = new HashSet<>();
 
     private final StackPane[][] tiles = new StackPane[BOARD_SIZE][BOARD_SIZE];
 
@@ -66,44 +63,22 @@ public class BoardView extends GridPane {
                 redrawTile(row, col);
     }
 
-    /**
-     * Called AFTER setSelectedPiece so selectedRow/Col are already set.
-     * Classifies each destination as a capture (jump of 2) or a normal move.
-     */
     public void setHighlights(int[][] squares) {
-        moveDots.clear();
-        captureDots.clear();
-
-        if (squares != null) {
-            for (int[] sq : squares) {
-                int destRow = sq[0];
-                int destCol = sq[1];
-                String key = destRow + "," + destCol;
-
-                // Captures always jump exactly 2 squares diagonally
-                boolean isCapture = selectedRow >= 0
-                    && Math.abs(destRow - selectedRow) == 2
-                    && Math.abs(destCol - selectedCol) == 2;
-
-                if (isCapture) captureDots.add(key);
-                else           moveDots.add(key);
-            }
-        }
+        highlights.clear();
+        if (squares != null)
+            for (int[] sq : squares)
+                highlights.add(sq[0] + "," + sq[1]);
         refresh();
     }
 
-    /**
-     * Must be called BEFORE setHighlights so capture detection works correctly.
-     */
     public void setSelectedPiece(int row, int col) {
         selectedRow = row;
         selectedCol = col;
-        // Do NOT call refresh here — setHighlights will call it right after
+        refresh();
     }
 
     public void clearHighlights() {
-        moveDots.clear();
-        captureDots.clear();
+        highlights.clear();
         selectedRow = -1;
         selectedCol = -1;
         refresh();
@@ -155,30 +130,24 @@ public class BoardView extends GridPane {
             tile.getChildren().add(border);
         }
 
+        // ── Valid move / capture dot ──
         String key = row + "," + col;
+        if (highlights.contains(key)) {
+            Piece here = model.getPiece(row, col);
+            boolean isCapture = here != null;
+            double dotRadius = isCapture ? 34 : 14;
+            Color  dotColor  = isCapture ? CAPTURE_DOT_COLOR : MOVE_DOT_COLOR;
 
-        // ── Normal move dot — green circle on empty square ──
-        if (moveDots.contains(key)) {
-            Circle dot = new Circle(13);
-            dot.setFill(MOVE_DOT_COLOR);
+            Circle dot = new Circle(dotRadius);
+            dot.setFill(dotColor);
             dot.setMouseTransparent(true);
             tile.getChildren().add(dot);
         }
 
-        // ── Piece (drawn before capture ring so ring appears on top) ──
+        // ── Piece ──
         Piece piece = model.getPiece(row, col);
         if (piece != null) {
             tile.getChildren().add(buildPiece(piece));
-        }
-
-        // ── Capture ring — orange ring drawn ON TOP of the enemy piece ──
-        if (captureDots.contains(key)) {
-            Circle ring = new Circle(30);
-            ring.setFill(Color.TRANSPARENT);
-            ring.setStroke(CAPTURE_DOT_COLOR);
-            ring.setStrokeWidth(4.5);
-            ring.setMouseTransparent(true);
-            tile.getChildren().add(ring);
         }
     }
 
