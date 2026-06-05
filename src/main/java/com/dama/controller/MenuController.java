@@ -1,21 +1,29 @@
 package com.dama.controller;
 
+import com.dama.dao.GameRecordDao;
+import com.dama.dao.SqliteGameRecordDao;
 import com.dama.model.Board;
 import com.dama.network.Client;
 import com.dama.view.GameWindow;
 import com.dama.view.MenuView;
 import com.dama.view.SessionOverlayView;
-
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+
+import java.sql.SQLException;
 
 public class MenuController {
 
     private final Stage primaryStage;
+    private final GameRecordDao gameRecordDao;
 
     public MenuController(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        this.gameRecordDao = new SqliteGameRecordDao();
+        initializeGameRecordTable();
     }
 
     public void showMenu() {
@@ -39,6 +47,11 @@ public class MenuController {
             @Override
             public void onMultiplayerJoin(String code) {
                 startMultiplayerJoin(code);
+            }
+
+            @Override
+            public void onGameHistory() {
+                menu.showGameHistory(getGameHistory());
             }
         });
         menu.show();
@@ -118,5 +131,30 @@ public class MenuController {
 
     private void addBackToMenuButton(GameWindow window) {
         window.setOnMenuRequested(this::showMenu);
+    }
+
+    private ObservableList<GameRecord> getGameHistory() {
+        try {
+            return FXCollections.observableArrayList(gameRecordDao.findAll());
+        } catch (SQLException e) {
+            showDatabaseError("Could not load game history.");
+            return FXCollections.observableArrayList();
+        }
+    }
+
+    private void initializeGameRecordTable() {
+        try {
+            gameRecordDao.createTable();
+        } catch (SQLException e) {
+            showDatabaseError("Could not initialize game history.");
+        }
+    }
+
+    private void showDatabaseError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Database Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

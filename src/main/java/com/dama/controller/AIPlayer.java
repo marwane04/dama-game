@@ -1,13 +1,9 @@
 package com.dama.controller;
 
+import com.dama.model.*;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.dama.model.Board;
-import com.dama.model.Color;
-import com.dama.model.GameState;
-import com.dama.model.Piece;
-import com.dama.model.Position;
 
 public class AIPlayer {
 

@@ -1,21 +1,20 @@
 package com.dama.view;
 
+import com.dama.controller.GameRecord;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -32,6 +31,7 @@ public class MenuView {
         void onPvP();
         void onMultiplayerHost();
         void onMultiplayerJoin(String code);
+        void onGameHistory();
     }
 
     private final Stage stage;
@@ -39,6 +39,7 @@ public class MenuView {
 
     // Track which card is showing
     private StackPane root;
+    private Button historyButton;
 
     public MenuView(Stage stage) {
         this.stage = stage;
@@ -122,6 +123,8 @@ public class MenuView {
 
         card.getChildren().addAll(pieces, title, subtitle, divider, pvAiBtn, pvpBtn, multiBtn);
         animateCardIn(card);
+
+        showHistoryButton();
     }
 
     // ── Screen 2: Multiplayer Sub-menu ────────────────────────────
@@ -157,6 +160,63 @@ public class MenuView {
         return card;
     }
 
+    // ── Screen 3: Game History ────────────────────────────
+
+    public void showGameHistory(ObservableList<GameRecord> rows) {
+        TableView<GameRecord> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        table.setPrefHeight(260);
+        table.setItems(rows);
+        table.setStyle(
+                "-fx-background-color:#16213E;" +
+                "-fx-control-inner-background:#1A1A2E;" +
+                "-fx-table-cell-border-color:#3a4060;" +
+                "-fx-text-fill:white;"
+        );
+
+        TableColumn<GameRecord, String> startTimeColumn = new TableColumn<>(
+                "Start Time");
+        startTimeColumn.setCellValueFactory(new PropertyValueFactory<>(
+                "formattedStartTime"));
+
+        TableColumn<GameRecord, String> resultColumn = new TableColumn<>("Result");
+        resultColumn.setCellValueFactory(new PropertyValueFactory<>("result"));
+
+        TableColumn<GameRecord, String> gameModeColumn = new TableColumn<>("Game " +
+                "Mode");
+        gameModeColumn.setCellValueFactory(new PropertyValueFactory<>("gameMode"));
+
+        table.getColumns().add(startTimeColumn);
+        table.getColumns().add(resultColumn);
+        table.getColumns().add(gameModeColumn);
+
+        Text title = new Text("Game History");
+        title.setFont(Font.font("Serif", FontWeight.BOLD, 42));
+        title.setFill(Color.web("#FFD700"));
+
+        Text subtitle = new Text("Recent test games");
+        subtitle.setFont(Font.font("SansSerif", FontWeight.NORMAL, 14));
+        subtitle.setFill(Color.web("#8899AA"));
+
+        Button backButton = new Button("Back");
+        backButton.setPrefSize(130, 40);
+        backButton.setFont(Font.font("SansSerif", FontWeight.BOLD, 13));
+        backButton.setStyle("-fx-background-color:#0F3460;-fx-text-fill:white;-fx-background-radius:6;-fx-cursor:hand;");
+        backButton.setOnAction(e -> show());
+
+        VBox historyRoot = new VBox(18, title, subtitle, table, backButton);
+        historyRoot.setAlignment(Pos.CENTER);
+        historyRoot.setPadding(new Insets(45, 80, 45, 80));
+        historyRoot.setBackground(new Background(new BackgroundFill(
+                Color.web("#1A1A2E"), CornerRadii.EMPTY, Insets.EMPTY
+        )));
+
+        stage.setTitle("Dama — Game History");
+        stage.setScene(new Scene(historyRoot, 820, 640));
+        stage.setResizable(false);
+        stage.show();
+    }
+
     // ── Animation helpers ─────────────────────────────────────────
 
     private void animateToCard(VBox newCard) {
@@ -167,6 +227,7 @@ public class MenuView {
     private void clearCards() {
         // Remove all VBox cards (keep bg + overlay which are Canvas and Pane)
         root.getChildren().removeIf(n -> n instanceof VBox);
+        hideHistoryButton();
     }
 
     private void animateCardIn(VBox card) {
@@ -181,6 +242,28 @@ public class MenuView {
 
         TranslateTransition slide = new TranslateTransition(Duration.millis(400), card);
         slide.setFromY(20); slide.setToY(0); slide.play();
+    }
+
+    private void showHistoryButton() {
+        if (historyButton == null) {
+            historyButton = createSecondaryButton("History");
+            historyButton.setPrefSize(120, 32);
+            historyButton.setFont(Font.font("SansSerif", FontWeight.NORMAL, 12));
+            historyButton.setOnAction(e -> {
+                if (menuListener != null) menuListener.onGameHistory();
+            });
+        }
+        if (!root.getChildren().contains(historyButton)) {
+            root.getChildren().add(historyButton);
+            StackPane.setAlignment(historyButton, Pos.BOTTOM_RIGHT);
+            StackPane.setMargin(historyButton, new Insets(0, 16, 16, 0));
+        }
+    }
+
+    private void hideHistoryButton() {
+        if (historyButton != null) {
+            root.getChildren().remove(historyButton);
+        }
     }
 
     // ── Card shell ────────────────────────────────────────────────
@@ -313,5 +396,29 @@ public class MenuView {
                 gc.setFill((r + c) % 2 == 0 ? light : dark);
                 gc.fillRect(c * ts, r * ts, ts, ts);
             }
+    }
+
+    public static class GameHistoryRow {
+        private final String startTime;
+        private final String result;
+        private final String gameMode;
+
+        public GameHistoryRow(String startTime, String result, String gameMode) {
+            this.startTime = startTime;
+            this.result = result;
+            this.gameMode = gameMode;
+        }
+
+        public String getStartTime() {
+            return startTime;
+        }
+
+        public String getResult() {
+            return result;
+        }
+
+        public String getGameMode() {
+            return gameMode;
+        }
     }
 }
