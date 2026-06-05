@@ -1,12 +1,8 @@
 package com.dama.view;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.dama.controller.GameController;
 import com.dama.model.Board;
 import com.dama.model.Piece;
-
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.layout.GridPane;
@@ -17,6 +13,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class BoardView extends GridPane {
 

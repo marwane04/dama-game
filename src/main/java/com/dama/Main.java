@@ -1,7 +1,6 @@
 package com.dama;
 
 import com.dama.controller.MenuController;
-
 import javafx.application.Application;
 import javafx.stage.Stage;
 
