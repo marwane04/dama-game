@@ -38,3 +38,9 @@ build/
 ### Repomix ###
 repomix-output.xml
 repomix-*.xml
+
+# SQLite databases
+*.db
+*.sqlite
+*.db-wal
+*.db-shm
