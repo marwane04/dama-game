@@ -5,8 +5,9 @@ import com.dama.network.Client;
 import com.dama.view.GameWindow;
 import com.dama.view.MenuView;
 import com.dama.view.SessionOverlayView;
-
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
@@ -43,7 +44,7 @@ public class MenuController {
 
             @Override
             public void onGameHistory() {
-                showGameHistory();
+                menu.showGameHistory(getTestGameHistory());
             }
         });
         menu.show();
@@ -125,7 +126,11 @@ public class MenuController {
         window.setOnMenuRequested(this::showMenu);
     }
 
-    private void showGameHistory() {
-        //#TODO
+    private ObservableList<GameRecord> getTestGameHistory() {
+        return FXCollections.observableArrayList(
+                new GameRecord("win", GameType.ONLINE),
+                new GameRecord("loss", GameType.LOCAL_VS_AI),
+                new GameRecord("win", GameType.ONLINE)
+                );
     }
 }
