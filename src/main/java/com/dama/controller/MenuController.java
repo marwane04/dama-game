@@ -1,5 +1,7 @@
 package com.dama.controller;
 
+import com.dama.dao.GameRecordDao;
+import com.dama.dao.SqliteGameRecordDao;
 import com.dama.model.Board;
 import com.dama.network.Client;
 import com.dama.view.GameWindow;
@@ -11,12 +13,17 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
+import java.sql.SQLException;
+
 public class MenuController {
 
     private final Stage primaryStage;
+    private final GameRecordDao gameRecordDao;
 
     public MenuController(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        this.gameRecordDao = new SqliteGameRecordDao();
+        initializeGameRecordTable();
     }
 
     public void showMenu() {
@@ -44,7 +51,7 @@ public class MenuController {
 
             @Override
             public void onGameHistory() {
-                menu.showGameHistory(getTestGameHistory());
+                menu.showGameHistory(getGameHistory());
             }
         });
         menu.show();
@@ -126,11 +133,28 @@ public class MenuController {
         window.setOnMenuRequested(this::showMenu);
     }
 
-    private ObservableList<GameRecord> getTestGameHistory() {
-        return FXCollections.observableArrayList(
-                new GameRecord("win", GameType.ONLINE),
-                new GameRecord("loss", GameType.LOCAL_VS_AI),
-                new GameRecord("win", GameType.ONLINE)
-                );
+    private ObservableList<GameRecord> getGameHistory() {
+        try {
+            return FXCollections.observableArrayList(gameRecordDao.findAll());
+        } catch (SQLException e) {
+            showDatabaseError("Could not load game history.");
+            return FXCollections.observableArrayList();
+        }
+    }
+
+    private void initializeGameRecordTable() {
+        try {
+            gameRecordDao.createTable();
+        } catch (SQLException e) {
+            showDatabaseError("Could not initialize game history.");
+        }
+    }
+
+    private void showDatabaseError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Database Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

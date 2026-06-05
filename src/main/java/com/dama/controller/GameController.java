@@ -1,5 +1,7 @@
 package com.dama.controller;
 
+import com.dama.dao.GameRecordDao;
+import com.dama.dao.SqliteGameRecordDao;
 import com.dama.model.*;
 import com.dama.network.Client;
 import com.dama.network.Move;
@@ -7,6 +9,7 @@ import com.dama.view.CheckersView;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class GameController {
@@ -14,6 +17,7 @@ public class GameController {
     private final Board model;
     private final CheckersView view;
     private final GameType gameType;
+    private final GameRecordDao gameRecordDao;
 
     private Client localClient;
     private final AIPlayer aiPlayer;
@@ -21,6 +25,7 @@ public class GameController {
     private boolean isLocalTurn = true;
     private boolean onlineReady = true;
     private boolean aiThinking = false;
+    private boolean gameRecorded = false;
 
     private Client.StartListener onlineStartListener;
 
@@ -31,7 +36,9 @@ public class GameController {
         this.model = model;
         this.view = view;
         this.gameType = gameType;
+        this.gameRecordDao = new SqliteGameRecordDao();
         this.aiPlayer = new AIPlayer();
+        initializeGameRecordTable();
         updateStatusForCurrentPlayer();
     }
 
@@ -171,6 +178,7 @@ public class GameController {
         model.reset();
         clearSelection();
         aiThinking = false;
+        gameRecorded = false;
         updateStatusForCurrentPlayer();
     }
 
@@ -227,9 +235,47 @@ public class GameController {
 
     private void checkGameOver() {
         GameState state = model.getState();
+        recordGameResult(state);
         if (state == GameState.RED_WINS)   view.showGameOverMessage("RED");
         if (state == GameState.BLACK_WINS) view.showGameOverMessage(gameType == GameType.LOCAL_VS_AI ? "AI (BLACK)" : "BLACK");
         if (state == GameState.DRAW)       view.showGameOverMessage("Draw");
+    }
+
+    private void recordGameResult(GameState state) {
+        if (gameRecorded || state == GameState.IN_PROGRESS) {
+            return;
+        }
+
+        gameRecorded = true;
+        try {
+            gameRecordDao.insert(new GameRecord(toResultLabel(state), gameType));
+        } catch (SQLException e) {
+            System.err.println("Could not save game history: " + e.getMessage());
+        }
+    }
+
+    private String toResultLabel(GameState state) {
+        if (state == GameState.DRAW) {
+            return "Draw";
+        }
+
+        if (gameType == GameType.LOCAL_VS_AI) {
+            return state == GameState.RED_WINS ? "Win" : "Loss";
+        }
+
+        if (gameType == GameType.ONLINE) {
+            return state == GameState.RED_WINS ? "Win" : "Loss";
+        }
+
+        return state == GameState.RED_WINS ? "Red wins" : "Black wins";
+    }
+
+    private void initializeGameRecordTable() {
+        try {
+            gameRecordDao.createTable();
+        } catch (SQLException e) {
+            System.err.println("Could not initialize game history: " + e.getMessage());
+        }
     }
 
     // ── Remote move handler (Online) ──────────────────────────────
