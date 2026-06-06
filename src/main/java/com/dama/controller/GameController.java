@@ -175,6 +175,12 @@ public class GameController {
     // ── Game actions ──────────────────────────────────────────────
 
     public void onNewGame() {
+        /*
+        * ignore new game button on online game
+        * TODO: implement later
+        **/
+        if(gameType == GameType.ONLINE) return;
+
         model.reset();
         clearSelection();
         aiThinking = false;
